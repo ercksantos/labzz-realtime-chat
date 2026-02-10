@@ -1,0 +1,43 @@
+{
+    "name": "labzz-chat-backend",
+    "version": "1.0.0",
+    "description": "Backend do sistema de chat em tempo real - Labzz",
+    "main": "dist/server.js",
+    "scripts": {
+        "dev": "nodemon --exec ts-node src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "lint": "eslint src --ext .ts",
+        "lint:fix": "eslint src --ext .ts --fix",
+        "format": "prettier --write 'src/**/*.ts'"
+    },
+    "keywords": [
+        "chat",
+        "realtime",
+        "websocket",
+        "typescript",
+        "node"
+    ],
+    "author": "Labzz Team",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "@typescript-eslint/eslint-plugin": "^6.13.2",
+        "@typescript-eslint/parser": "^6.13.2",
+        "eslint": "^8.55.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.0.1",
+        "nodemon": "^3.0.2",
+        "prettier": "^3.1.0",
+        "prisma": "^5.7.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.7.1",
+        "dotenv": "^16.3.1"
+    }
+}
