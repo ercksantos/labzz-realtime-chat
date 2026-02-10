@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express, { Application } from 'express';
+import { createServer } from 'http';
 import { config } from './config';
+import { initializeSocket } from './config/socket';
 import { helmetMiddleware, corsMiddleware } from './middlewares/security';
 import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
@@ -9,6 +11,12 @@ import logger from './utils/logger';
 import apiRoutes from './routes';
 
 const app: Application = express();
+const httpServer = createServer(app);
+const io = initializeSocket(httpServer);
+
+// Disponibilizar io globalmente para uso nos controllers
+app.set('io', io);
+
 const PORT = config.port;
 
 app.use(express.json());
@@ -33,10 +41,11 @@ app.use('/api', apiRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
     logger.info(`Environment: ${config.nodeEnv}`);
     logger.info(`Health check: http://localhost:${PORT}/health`);
+    logger.info(`WebSocket server ready`);
 });
 
 // Tratamento de erros não capturados
