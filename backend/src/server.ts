@@ -6,6 +6,7 @@ import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
+import apiRoutes from './routes';
 
 const app: Application = express();
 const PORT = config.port;
@@ -36,13 +37,7 @@ app.get('/health', (_req, res) => {
 });
 
 // API routes
-app.get('/api', (_req, res) => {
-    res.json({
-        message: 'Labzz Chat API',
-        version: '1.0.0',
-        documentation: '/api-docs',
-    });
-});
+app.use('/api', apiRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
@@ -50,7 +45,6 @@ app.use(notFoundHandler);
 // Error handler (deve ser o último middleware)
 app.use(errorHandler);
 
-// Iniciar servidor
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
     logger.info(`Environment: ${config.nodeEnv}`);
