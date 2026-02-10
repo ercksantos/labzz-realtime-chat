@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
+import twoFactorRoutes from './twoFactor.routes';
+import oauthRoutes from './oauth.routes';
 
 const router = Router();
 
-// Mount routes
 router.use('/auth', authRoutes);
+router.use('/2fa', twoFactorRoutes);
+router.use('/oauth', oauthRoutes);
 
-// API info
 router.get('/', (_req, res) => {
     res.json({
         message: 'Labzz Chat API',

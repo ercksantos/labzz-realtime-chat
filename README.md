@@ -155,13 +155,6 @@ labzz-realtime-chat/
 └── README.md             # Este arquivo
 ```
 
-## 📝 Documentação
-
-- [Roadmap Backend](./BACKEND_ROADMAP.md) - Etapas detalhadas do desenvolvimento backend
-- [Roadmap Frontend](./FRONTEND_ROADMAP.md) - Etapas detalhadas do desenvolvimento frontend
-- [Arquitetura](./docs/ARCHITECTURE.md) - Visão geral da arquitetura do sistema
-- [API Docs](http://localhost:4000/api-docs) - Documentação Swagger (quando o backend estiver rodando)
-
 ## 🔒 Segurança
 
 O projeto implementa diversas camadas de segurança:

@@ -25,6 +25,12 @@ export const refreshTokenSchema = z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+export const verify2FASchema = z.object({
+    userId: z.string().uuid('Invalid user ID'),
+    token: z.string().length(6, 'Token must be 6 digits'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+export type Verify2FAInput = z.infer<typeof verify2FASchema>;

@@ -4,6 +4,7 @@ import {
     registerSchema,
     loginSchema,
     refreshTokenSchema,
+    verify2FASchema,
 } from '../validators/auth.validator';
 import { ZodError } from 'zod';
 import { AppError } from '../middlewares/errorHandler';
@@ -34,7 +35,37 @@ export class AuthController {
             const validatedData = loginSchema.parse(req.body);
             const result = await authService.login(validatedData);
 
+            if ('requires2FA' in result && result.requires2FA) {
+                return res.status(200).json({
+                    status: 'success',
+                    data: result,
+                });
+            }
+
+            // @ts-expect-error - user exists when not requiring 2FA
             logger.info(`User logged in: ${result.user.email}`);
+
+            res.status(200).json({
+                status: 'success',
+                data: result,
+            });
+        } catch (error) {
+            if (error instanceof ZodError) {
+                return next(new AppError(error.errors[0].message, 400));
+            }
+            next(error);
+        }
+    }
+
+    async verify2FA(req: Request, res: Response, next: NextFunction) {
+        try {
+            const validatedData = verify2FASchema.parse(req.body);
+            const result = await authService.verify2FAAndLogin(
+                validatedData.userId,
+                validatedData.token
+            );
+
+            logger.info(`User logged in with 2FA: ${result.user.email}`);
 
             res.status(200).json({
                 status: 'success',

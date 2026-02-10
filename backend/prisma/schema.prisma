@@ -10,31 +10,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Model - Complete authentication structure
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   username      String    @unique
-  password      String?   // Nullable for OAuth users
+  password      String?
   name          String
   avatar        String?
   
-  // OAuth
-  provider      String?   // google, github, null
+  provider      String?
   providerId    String?
   
-  // 2FA
   twoFactorSecret String?
   twoFactorEnabled Boolean @default(false)
   
-  // Status
   isOnline      Boolean   @default(false)
   lastSeen      DateTime  @default(now())
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
-  // Relations
   refreshTokens    RefreshToken[]
 
   @@index([email])
@@ -42,7 +37,6 @@ model User {
   @@map("users")
 }
 
-// Refresh Token for JWT authentication
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique

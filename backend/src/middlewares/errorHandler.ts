@@ -31,7 +31,6 @@ export const errorHandler = (
         isOperational = err.isOperational;
     }
 
-    // Log do erro
     if (statusCode >= 500) {
         logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
         logger.error(err.stack);
@@ -39,7 +38,6 @@ export const errorHandler = (
         logger.warn(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
     }
 
-    // Resposta ao cliente
     res.status(statusCode).json({
         status: 'error',
         statusCode,

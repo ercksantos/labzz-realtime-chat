@@ -10,11 +10,11 @@ export const authMiddleware = (req: Request, _res: Response, next: NextFunction)
             throw new AppError('No token provided', 401);
         }
 
-        const token = authHeader.substring(7); // Remove 'Bearer '
+        const token = authHeader.substring(7);
 
         const payload = jwtService.verifyAccessToken(token);
 
-        // Attach user info to request
+        // Anexa dados do usuário ao request para uso nos controllers
         // @ts-expect-error - Adding custom properties to Request
         req.userId = payload.userId;
         // @ts-expect-error - Adding custom properties to Request

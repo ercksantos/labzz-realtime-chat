@@ -11,21 +11,14 @@ import apiRoutes from './routes';
 const app: Application = express();
 const PORT = config.port;
 
-// Middlewares de parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middlewares de segurança
 app.use(helmetMiddleware);
 app.use(corsMiddleware);
-
-// Request logging
 app.use(requestLogger);
-
-// Rate limiting
 app.use(generalLimiter);
 
-// Health check endpoint
 app.get('/health', (_req, res) => {
     res.json({
         status: 'ok',
@@ -36,13 +29,8 @@ app.get('/health', (_req, res) => {
     });
 });
 
-// API routes
 app.use('/api', apiRoutes);
-
-// 404 handler
 app.use(notFoundHandler);
-
-// Error handler (deve ser o último middleware)
 app.use(errorHandler);
 
 app.listen(PORT, () => {
