@@ -1,3 +1,4 @@
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { ChatService } from '../../services/chat.service';
 import prisma from '../../config/database';
 
@@ -24,7 +25,7 @@ describe('ChatService', () => {
                 },
             ];
 
-            (prisma.conversation.findMany as jest.Mock).mockResolvedValue(mockConversations);
+            (prisma.conversation.findMany as any).mockResolvedValue(mockConversations);
 
             const result = await chatService.getUserConversations('user-1');
 

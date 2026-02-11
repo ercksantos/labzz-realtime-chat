@@ -1,17 +1,32 @@
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import bcrypt from 'bcrypt';
 import { AuthService } from '../../services/auth.service';
 import prisma from '../../config/database';
 
 jest.mock('../../config/database');
 jest.mock('bcrypt');
-jest.mock('../../services/email.service');
+jest.mock('../../services/email.service', () => ({
+    __esModule: true,
+    default: {
+        sendWelcomeEmail: (jest.fn() as any).mockResolvedValue({}),
+        sendPasswordResetEmail: (jest.fn() as any).mockResolvedValue({}),
+    },
+}));
+jest.mock('../../services/elasticsearch.service', () => ({
+    __esModule: true,
+    default: {
+        indexUser: (jest.fn() as any).mockResolvedValue({}),
+    },
+}));
 
 // Mock do módulo jwt diretamente
 jest.mock('../../utils/jwt', () => ({
-    generateAccessToken: jest.fn(() => 'access-token'),
-    generateRefreshToken: jest.fn(() => 'refresh-token'),
-    verifyAccessToken: jest.fn(),
-    verifyRefreshToken: jest.fn(),
+    jwtService: {
+        generateAccessToken: jest.fn(() => 'access-token'),
+        generateRefreshToken: jest.fn(() => 'refresh-token'),
+        verifyAccessToken: jest.fn(),
+        verifyRefreshToken: jest.fn(),
+    },
 }));
 
 describe('AuthService', () => {
@@ -39,10 +54,10 @@ describe('AuthService', () => {
                 githubId: null,
             };
 
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-            (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-            (prisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-            (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+            (prisma.user.findFirst as any).mockResolvedValue(null);
+            (bcrypt.hash as any).mockResolvedValue('hashedPassword');
+            (prisma.user.create as any).mockResolvedValue(mockUser);
+            (prisma.refreshToken.create as any).mockResolvedValue({});
 
             const result = await authService.register({
                 email: 'test@example.com',
@@ -51,15 +66,17 @@ describe('AuthService', () => {
                 password: 'password123',
             });
 
-            expect(result).toHaveProperty('user');
-            expect(result).toHaveProperty('accessToken', 'access-token');
-            expect(result).toHaveProperty('refreshToken', 'refresh-token');
-            expect(result.user.email).toBe('test@example.com');
+            expect(result).toHaveProperty('id');
+            expect(result).toHaveProperty('email', 'test@example.com');
+            expect(result).toHaveProperty('username', 'testuser');
             expect(prisma.user.create).toHaveBeenCalled();
         });
 
         it('deve lançar erro se email já existe', async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: '1' });
+            (prisma.user.findFirst as any).mockResolvedValue({
+                id: '1',
+                email: 'test@example.com',
+            });
 
             await expect(
                 authService.register({
@@ -68,7 +85,7 @@ describe('AuthService', () => {
                     name: 'Test User',
                     password: 'password123',
                 })
-            ).rejects.toThrow('Email já está em uso');
+            ).rejects.toThrow('Email already exists');
         });
     });
 
@@ -84,9 +101,9 @@ describe('AuthService', () => {
                 twoFactorEnabled: false,
             };
 
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-            (prisma.refreshToken.create as jest.Mock).mockResolvedValue({});
+            (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+            (bcrypt.compare as any).mockResolvedValue(true);
+            (prisma.refreshToken.create as any).mockResolvedValue({});
 
             const result = await authService.login({
                 email: 'test@example.com',
@@ -95,33 +112,33 @@ describe('AuthService', () => {
 
             expect(result).toHaveProperty('accessToken');
             expect(result).toHaveProperty('refreshToken');
-            expect(result.user.email).toBe('test@example.com');
+            expect(result.user?.email).toBe('test@example.com');
         });
 
         it('deve lançar erro com credenciais inválidas', async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+            (prisma.user.findUnique as any).mockResolvedValue({
                 id: '1',
                 password: 'hashedPassword',
             });
-            (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+            (bcrypt.compare as any).mockResolvedValue(false);
 
             await expect(
                 authService.login({
                     email: 'test@example.com',
                     password: 'wrongpassword',
                 })
-            ).rejects.toThrow('Credenciais inválidas');
+            ).rejects.toThrow('Invalid email or password');
         });
 
         it('deve lançar erro se usuário não existe', async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+            (prisma.user.findUnique as any).mockResolvedValue(null);
 
             await expect(
                 authService.login({
                     email: 'nonexistent@example.com',
                     password: 'password123',
                 })
-            ).rejects.toThrow('Credenciais inválidas');
+            ).rejects.toThrow('Invalid email or password');
         });
     });
 });

@@ -1,8 +1,17 @@
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { UserService } from '../../services/user.service';
 import prisma from '../../config/database';
+import elasticsearchService from '../../services/elasticsearch.service';
 
 jest.mock('../../config/database');
-jest.mock('../../services/elasticsearch.service');
+jest.mock('../../services/elasticsearch.service', () => ({
+    __esModule: true,
+    default: {
+        indexUser: (jest.fn() as any).mockResolvedValue({}),
+        deleteUser: (jest.fn() as any).mockResolvedValue({}),
+        searchUsers: (jest.fn() as any).mockResolvedValue({ hits: [], total: 0 }),
+    },
+}));
 
 describe('UserService', () => {
     let userService: UserService;
@@ -24,7 +33,7 @@ describe('UserService', () => {
                 updatedAt: new Date(),
             };
 
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+            (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
             const result = await userService.getUserById('1');
 
@@ -37,16 +46,20 @@ describe('UserService', () => {
         });
 
         it('deve retornar null se usuário não existe', async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+            (prisma.user.findUnique as any).mockResolvedValue(null);
 
-            const result = await userService.getUserById('999');
-
-            expect(result).toBeNull();
+            await expect(userService.getUserById('999')).rejects.toThrow('User not found');
         });
     });
 
     describe('updateUser', () => {
         it('deve atualizar dados do usuário', async () => {
+            const existingUser = {
+                id: '1',
+                email: 'test@example.com',
+                username: 'testuser',
+            };
+
             const mockUser = {
                 id: '1',
                 email: 'test@example.com',
@@ -57,7 +70,12 @@ describe('UserService', () => {
                 updatedAt: new Date(),
             };
 
-            (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
+            // Primeira chamada: verificar se usuário existe (por id)
+            // Segunda chamada: verificar se username já existe
+            (prisma.user.findUnique as any)
+                .mockResolvedValueOnce(existingUser)
+                .mockResolvedValueOnce(null);
+            (prisma.user.update as any).mockResolvedValue(mockUser);
 
             const result = await userService.updateUser('1', {
                 username: 'updateduser',
@@ -79,7 +97,8 @@ describe('UserService', () => {
 
     describe('deleteUser', () => {
         it('deve deletar usuário com sucesso', async () => {
-            (prisma.user.delete as jest.Mock).mockResolvedValue({ id: '1' });
+            (prisma.user.findUnique as any).mockResolvedValue({ id: '1' });
+            (prisma.user.delete as any).mockResolvedValue({ id: '1' });
 
             await userService.deleteUser('1');
 

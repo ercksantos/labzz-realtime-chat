@@ -4,6 +4,8 @@ jest.mock('@prisma/client', () => {
         user: {
             findUnique: jest.fn(),
             findMany: jest.fn(),
+            findFirst: jest.fn(),
+            count: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
@@ -77,6 +79,7 @@ jest.mock('bullmq', () => ({
         add: jest.fn().mockResolvedValue({ id: 'job-id' }),
         getJobs: jest.fn().mockResolvedValue([]),
         clean: jest.fn(),
+        on: jest.fn(),
     })),
     Worker: jest.fn().mockImplementation(() => ({
         on: jest.fn(),

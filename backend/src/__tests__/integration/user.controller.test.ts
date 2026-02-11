@@ -1,3 +1,4 @@
+import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import express, { Application } from 'express';
 import userRoutes from '../../routes/user.routes';
@@ -7,7 +8,9 @@ import prisma from '../../config/database';
 jest.mock('../../config/database');
 jest.mock('../../middlewares/auth.middleware', () => ({
     authMiddleware: (req: any, _res: any, next: any) => {
-        req.user = { id: 'user-1' };
+        req.userId = '1';
+        req.userEmail = 'test@example.com';
+        req.username = 'testuser';
         next();
     },
 }));
@@ -54,14 +57,17 @@ describe('User API Integration Tests', () => {
                 },
             ];
 
-            (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers);
+            (prisma.user.findMany as any).mockResolvedValue(mockUsers);
+            (prisma.user.count as any).mockResolvedValue(2);
 
             const response = await request(app).get('/api/users');
 
             expect(response.status).toBe(200);
             expect(response.body.status).toBe('success');
-            expect(response.body.data).toBeInstanceOf(Array);
-            expect(response.body.data).toHaveLength(2);
+            expect(response.body.data.users).toBeInstanceOf(Array);
+            expect(response.body.data.users).toHaveLength(2);
+            expect(response.body.data.pagination).toBeDefined();
+            expect(response.body.data.pagination.total).toBe(2);
         });
     });
 
@@ -77,17 +83,17 @@ describe('User API Integration Tests', () => {
                 updatedAt: new Date(),
             };
 
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+            (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
             const response = await request(app).get('/api/users/1');
 
             expect(response.status).toBe(200);
             expect(response.body.status).toBe('success');
-            expect(response.body.data.email).toBe('test@example.com');
+            expect(response.body.data.user.email).toBe('test@example.com');
         });
 
         it('deve retornar 404 se usuário não existe', async () => {
-            (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+            (prisma.user.findUnique as any).mockResolvedValue(null);
 
             const response = await request(app).get('/api/users/999');
 
@@ -97,6 +103,12 @@ describe('User API Integration Tests', () => {
 
     describe('PUT /api/users/:id', () => {
         it('deve atualizar dados do usuário', async () => {
+            const existingUser = {
+                id: '1',
+                email: 'test@example.com',
+                username: 'testuser',
+            };
+
             const mockUser = {
                 id: '1',
                 email: 'test@example.com',
@@ -107,7 +119,12 @@ describe('User API Integration Tests', () => {
                 updatedAt: new Date(),
             };
 
-            (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
+            // Primeira chamada: verificar se usuário existe (por id)
+            // Segunda chamada: verificar se username já existe
+            (prisma.user.findUnique as any)
+                .mockResolvedValueOnce(existingUser)
+                .mockResolvedValueOnce(null);
+            (prisma.user.update as any).mockResolvedValue(mockUser);
 
             const response = await request(app).put('/api/users/1').send({
                 username: 'updateduser',
@@ -116,7 +133,7 @@ describe('User API Integration Tests', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.status).toBe('success');
-            expect(response.body.data.username).toBe('updateduser');
+            expect(response.body.data.user.username).toBe('updateduser');
         });
 
         it('deve retornar erro 400 para dados inválidos', async () => {
@@ -130,7 +147,8 @@ describe('User API Integration Tests', () => {
 
     describe('DELETE /api/users/:id', () => {
         it('deve deletar usuário', async () => {
-            (prisma.user.delete as jest.Mock).mockResolvedValue({ id: '1' });
+            (prisma.user.findUnique as any).mockResolvedValue({ id: '1' });
+            (prisma.user.delete as any).mockResolvedValue({ id: '1' });
 
             const response = await request(app).delete('/api/users/1');
 
