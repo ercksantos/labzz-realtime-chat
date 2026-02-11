@@ -1,0 +1,43 @@
+export const env = {
+  // API Configuration
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api',
+  wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000',
+
+  // OAuth Configuration
+  oauth: {
+    google: {
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+    },
+    github: {
+      clientId: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '',
+    },
+    facebook: {
+      appId: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '',
+    },
+  },
+
+  // App Configuration
+  app: {
+    name: process.env.NEXT_PUBLIC_APP_NAME || 'Labzz Chat',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  },
+
+  // Feature Flags
+  features: {
+    oauth: true,
+    twoFactor: true,
+    darkMode: true,
+    i18n: true,
+  },
+};
+
+// Validate required environment variables in production
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnvVars = ['NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_WS_URL'];
+
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      throw new Error(`Missing required environment variable: ${envVar}`);
+    }
+  });
+}
