@@ -33,20 +33,31 @@ Sistema de chat em tempo real desenvolvido como teste técnico para Labzz. A apl
 
 ## ✨ Funcionalidades
 
-### Implementadas
+### Implementadas ✅
 - ✅ Estrutura de pastas organizada
 - ✅ Docker Compose configurado (PostgreSQL, Redis, Elasticsearch)
+- ✅ Autenticação completa (JWT + OAuth2 Google/GitHub + 2FA/TOTP)
+- ✅ CRUD de usuários com autorização
+- ✅ Chat em tempo real via WebSocket (Socket.io)
+- ✅ Histórico de mensagens com paginação
+- ✅ Conversas diretas e em grupo
+- ✅ Indicadores de digitação (typing indicator)
+- ✅ Presença online/offline em tempo real
+- ✅ Marcar mensagens como lidas
+- ✅ Rate limiting e segurança (Helmet, CORS)
+- ✅ Logging estruturado (Winston)
+- ✅ Validação de dados (Zod)
 
-### Em Desenvolvimento
-- 🔄 Autenticação completa (JWT + OAuth2 + 2FA)
-- 🔄 CRUD de usuários
-- 🔄 Chat em tempo real via WebSocket
-- 🔄 Histórico de mensagens com paginação
+### Em Desenvolvimento 🔄
 - 🔄 Busca de mensagens (Elasticsearch)
-- 🔄 Indicadores de digitação
+- 🔄 Cache com Redis
+- 🔄 Filas de processamento (BullMQ)
 - 🔄 Upload de arquivos/imagens
+- 🔄 Notificações push
+- 🔄 Interface frontend (Next.js)
 - 🔄 Modo escuro
 - 🔄 Suporte multilíngue (i18n)
+- 🔄 Testes automatizados
 
 ## 🚀 Como Rodar
 

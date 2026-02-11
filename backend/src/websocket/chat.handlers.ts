@@ -2,6 +2,8 @@ import { Server } from 'socket.io';
 import { AuthenticatedSocket } from './auth.middleware';
 import prisma from '../config/database';
 import logger from '../utils/logger';
+import elasticsearchService from '../services/elasticsearch.service';
+import { MessageDocument } from '../types/elasticsearch.types';
 
 export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) => {
     // Evento: enviar mensagem
@@ -44,6 +46,21 @@ export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) =>
                         },
                     },
                 },
+            });
+
+            // Indexar mensagem no Elasticsearch
+            const messageDoc: MessageDocument = {
+                id: message.id,
+                content: message.content,
+                senderId: message.senderId,
+                senderName: message.sender.name,
+                senderUsername: message.sender.username,
+                conversationId: message.conversationId,
+                createdAt: message.createdAt,
+                updatedAt: message.updatedAt,
+            };
+            elasticsearchService.indexMessage(messageDoc).catch((err) => {
+                logger.error('Erro ao indexar mensagem no ES:', err);
             });
 
             // Atualizar timestamp da conversa

@@ -88,13 +88,30 @@ backend/
 
 ## 📦 Tecnologias
 
+### Implementadas ✅
 - **Node.js** - Runtime JavaScript
 - **TypeScript** - Superset tipado do JavaScript
+- **Express** - Framework web minimalista
 - **Prisma** - ORM para PostgreSQL
-- **Express** - Framework web (próxima etapa)
-- **Socket.io** - WebSocket para tempo real (próxima etapa)
-- **Redis** - Cache e sessões (próxima etapa)
-- **Elasticsearch** - Motor de busca (próxima etapa)
+- **Socket.io** - WebSocket para comunicação em tempo real
+- **PostgreSQL** - Banco de dados relacional
+- **JWT** - Autenticação e autorização
+- **bcrypt** - Hash de senhas
+- **Zod** - Validação de dados
+- **Winston** - Logging estruturado
+- **Helmet** - Segurança HTTP headers
+- **CORS** - Cross-Origin Resource Sharing
+- **express-rate-limit** - Rate limiting
+- **speakeasy** - 2FA/TOTP
+- **qrcode** - Geração de QR codes
+- **axios** - Cliente HTTP para OAuth2
+
+### A Implementar 🔄
+- **Redis** - Cache e sessões
+- **Elasticsearch** - Motor de busca
+- **BullMQ** - Filas de processamento assíncrono
+- **Jest** + **Supertest** - Testes automatizados
+- **Swagger** - Documentação da API
 
 ## 🧪 Testes
 
