@@ -7,7 +7,7 @@ import { swaggerSpec } from './config/swagger';
 import { initializeSocket } from './config/socket';
 import {
     checkElasticsearchConnection,
-    initializeElasticsearchIndices,
+    // initializeElasticsearchIndices, // Temporariamente comentado devido a incompatibilidade de versão
 } from './config/elasticsearch';
 import { checkRedisConnection } from './config/redis';
 import cacheService from './services/cache.service';
@@ -98,7 +98,9 @@ const initializeServices = async () => {
     // Verificar e inicializar Elasticsearch
     const esConnected = await checkElasticsearchConnection();
     if (esConnected) {
-        await initializeElasticsearchIndices();
+        // TODO: Corrigir compatibilidade de versão do Elasticsearch
+        // await initializeElasticsearchIndices();
+        logger.info('⚠️  Elasticsearch conectado mas índices não inicializados (aguardando correção de versão)');
     } else {
         logger.warn('⚠️  Servidor iniciará sem Elasticsearch');
     }
