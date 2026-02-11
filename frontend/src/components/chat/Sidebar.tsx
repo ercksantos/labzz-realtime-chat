@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Avatar, Badge } from '../ui';
+import { UserSearch } from './UserSearch';
 import { cn } from '@/lib/utils/cn';
 
 interface Conversation {
@@ -54,6 +55,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeConversation, setActiveConversation] = useState<string | null>(null);
+    const [showUserSearch, setShowUserSearch] = useState(false);
 
     const filteredConversations = mockConversations.filter(
         (conv) =>
@@ -193,6 +195,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 {/* New Chat Button */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                     <button
+                        onClick={() => setShowUserSearch(true)}
                         className={cn(
                             'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg',
                             'bg-primary-600 hover:bg-primary-700 active:bg-primary-800',
@@ -212,6 +215,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </button>
                 </div>
             </aside>
+
+            {/* User Search Modal */}
+            {showUserSearch && (
+                <UserSearch
+                    onClose={() => setShowUserSearch(false)}
+                />
+            )}
         </>
     );
 }

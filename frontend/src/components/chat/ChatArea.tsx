@@ -4,70 +4,15 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Message, MessageProps } from './Message';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
-import { Avatar } from '../ui';
+import { MessageSearch } from './MessageSearch';
+import { Avatar, Loading } from '../ui';
 import { cn } from '@/lib/utils/cn';
 import { groupMessagesByDate } from '@/lib/utils/dateUtils';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Mock data - será substituído por dados reais do backend
-const mockMessages: MessageProps[] = [
-    {
-        id: '1',
-        content: 'Oi! Como você está?',
-        senderId: '2',
-        senderName: 'João Silva',
-        senderUsername: 'joaosilva',
-        senderAvatar: undefined,
-        createdAt: new Date(Date.now() - 86400000), // Yesterday
-        isOwn: false,
-        status: 'read',
-    },
-    {
-        id: '2',
-        content: 'Estou bem, obrigado! E você?',
-        senderId: '1',
-        senderName: 'Você',
-        senderUsername: 'voce',
-        senderAvatar: undefined,
-        createdAt: new Date(Date.now() - 86400000 + 60000),
-        isOwn: true,
-        status: 'read',
-    },
-    {
-        id: '3',
-        content: 'Também estou bem! Viu o projeto que enviei ontem?',
-        senderId: '2',
-        senderName: 'João Silva',
-        senderUsername: 'joaosilva',
-        senderAvatar: undefined,
-        createdAt: new Date(Date.now() - 3600000), // 1 hour ago
-        isOwn: false,
-        status: 'read',
-    },
-    {
-        id: '4',
-        content: 'Vi sim! Ficou muito bom. Só preciso revisar alguns detalhes e te retorno.',
-        senderId: '1',
-        senderName: 'Você',
-        senderUsername: 'voce',
-        senderAvatar: undefined,
-        createdAt: new Date(Date.now() - 3000000),
-        isOwn: true,
-        status: 'read',
-    },
-    {
-        id: '5',
-        content: 'Perfeito! Fico no aguardo então.',
-        senderId: '2',
-        senderName: 'João Silva',
-        senderUsername: 'joaosilva',
-        senderAvatar: undefined,
-        createdAt: new Date(Date.now() - 1800000),
-        isOwn: false,
-        status: 'read',
-    },
-];
+import { useMessages } from '@/hooks/useMessages';
+import { useNotifications } from '@/hooks/useNotifications';
+import type { Message as APIMessage } from '@/services/chat.service';
 
 interface ChatAreaProps {
     conversationId?: string;
@@ -82,16 +27,44 @@ export function ChatArea({
     conversationAvatar,
     isOnline = true,
 }: ChatAreaProps) {
-    const [messages, setMessages] = useState<MessageProps[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
+    const [showMessageSearch, setShowMessageSearch] = useState(false);
 
     const { socket, isConnected, emit, on, off } = useSocket();
     const { user } = useAuth();
+
+    // Enable notifications
+    useNotifications();
+
+    // Use the messages hook for pagination
+    const {
+        messages: apiMessages,
+        isLoading,
+        isLoadingMore,
+        hasMore,
+        loadMore,
+        addMessage: addApiMessage,
+        replaceTemporaryMessage,
+    } = useMessages({ conversationId });
+
+    // Convert API messages to MessageProps format
+    const messages: MessageProps[] = apiMessages.map((msg: APIMessage) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.senderId,
+        senderName: msg.sender.name,
+        senderUsername: msg.sender.username,
+        senderAvatar: msg.sender.avatar || undefined,
+        createdAt: new Date(msg.createdAt),
+        isOwn: msg.senderId === user?.id,
+        status: 'read' as const,
+    }));
 
     // Auto-scroll to bottom on new messages
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -104,16 +77,33 @@ export function ChatArea({
         }
     }, [messages, shouldAutoScroll]);
 
-    // Socket: Load conversation messages on mount
+    // Intersection Observer for infinite scroll (load more on scroll to top)
+    useEffect(() => {
+        if (!loadMoreTriggerRef.current || !hasMore || isLoadingMore) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+                    console.log('ChatArea: Carregando mais mensagens (scroll to top)');
+                    loadMore();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        observer.observe(loadMoreTriggerRef.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [hasMore, isLoadingMore, loadMore]);
+
+    // Socket: Join/leave conversation
     useEffect(() => {
         if (!conversationId || !isConnected) return;
 
-        console.log('ChatArea: Solicitando mensagens da conversa', conversationId);
+        console.log('ChatArea: Entrando na conversa', conversationId);
         emit('conversation:join', { conversationId });
-
-        // TODO: Load message history from API
-        // For now, using mock data
-        setMessages(mockMessages);
 
         return () => {
             console.log('ChatArea: Saindo da conversa', conversationId);
@@ -128,35 +118,27 @@ export function ChatArea({
         const handleNewMessage = (data: any) => {
             console.log('ChatArea: Nova mensagem recebida', data);
 
-            const newMessage: MessageProps = {
+            const apiMessage: APIMessage = {
                 id: data.id || data.messageId,
-                content: data.content || data.message,
+                conversationId: conversationId || '',
                 senderId: data.senderId || data.userId,
-                senderName: data.senderName || data.user?.name || 'Usuário',
-                senderUsername: data.senderUsername || data.user?.username || 'user',
-                senderAvatar: data.senderAvatar || data.user?.avatar,
-                createdAt: new Date(data.createdAt || Date.now()),
-                isOwn: data.senderId === user?.id,
-                status: 'delivered',
+                content: data.content || data.message,
+                createdAt: data.createdAt || new Date().toISOString(),
+                updatedAt: data.updatedAt || new Date().toISOString(),
+                sender: {
+                    id: data.senderId || data.userId,
+                    username: data.senderUsername || data.user?.username || 'user',
+                    name: data.senderName || data.user?.name || 'Usuário',
+                    avatar: data.senderAvatar || data.user?.avatar || null,
+                },
             };
 
-            setMessages((prev) => {
-                // Avoid duplicates
-                if (prev.some((msg) => msg.id === newMessage.id)) {
-                    return prev;
-                }
-                return [...prev, newMessage];
-            });
+            // Add to messages list
+            addApiMessage(apiMessage);
 
-            // Update message status to sent if it was our message
-            if (newMessage.isOwn) {
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                        msg.id.startsWith('temp-') && msg.content === newMessage.content
-                            ? { ...msg, id: newMessage.id, status: 'sent' }
-                            : msg
-                    )
-                );
+            // If it's our message and had a temporary ID, replace it
+            if (data.tempId && data.senderId === user?.id) {
+                replaceTemporaryMessage(data.tempId, apiMessage);
             }
         };
 
@@ -187,48 +169,22 @@ export function ChatArea({
             }
         };
 
-        const handleMessageDelivered = (data: any) => {
-            console.log('ChatArea: Mensagem entregue', data);
-            setMessages((prev) =>
-                prev.map((msg) =>
-                    msg.id === data.messageId
-                        ? { ...msg, status: 'delivered' as const }
-                        : msg
-                )
-            );
-        };
-
-        const handleMessageRead = (data: any) => {
-            console.log('ChatArea: Mensagem lida', data);
-            setMessages((prev) =>
-                prev.map((msg) =>
-                    msg.id === data.messageId
-                        ? { ...msg, status: 'read' as const }
-                        : msg
-                )
-            );
-        };
-
         // Register socket listeners
         on('message:new', handleNewMessage);
         on('typing:start', handleTypingStart);
         on('typing:stop', handleTypingStop);
-        on('message:delivered', handleMessageDelivered);
-        on('message:read', handleMessageRead);
 
         return () => {
             // Cleanup listeners
             off('message:new', handleNewMessage);
             off('typing:start', handleTypingStart);
             off('typing:stop', handleTypingStop);
-            off('message:delivered', handleMessageDelivered);
-            off('message:read', handleMessageRead);
 
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
             }
         };
-    }, [isConnected, user, on, off]);
+    }, [isConnected, user, on, off, addApiMessage, replaceTemporaryMessage, conversationId]);
 
     // Check if user is near bottom to enable/disable auto-scroll
     const handleScroll = () => {
@@ -244,21 +200,25 @@ export function ChatArea({
 
         setIsSending(true);
 
-        // Optimistic update - add message immediately
+        // Create temporary message for optimistic update
         const tempId = `temp-${Date.now()}`;
-        const newMessage: MessageProps = {
+        const tempMessage: APIMessage = {
             id: tempId,
+            conversationId,
+            senderId: user?.id || '',
             content,
-            senderId: user?.id || '1',
-            senderName: user?.name || 'Você',
-            senderUsername: user?.username || 'voce',
-            senderAvatar: user?.avatar || undefined,
-            createdAt: new Date(),
-            isOwn: true,
-            status: 'sending',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            sender: {
+                id: user?.id || '',
+                username: user?.username || 'voce',
+                name: user?.name || 'Você',
+                avatar: user?.avatar || null,
+            },
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        // Add temporary message immediately
+        addApiMessage(tempMessage);
 
         // Send via WebSocket if connected
         if (isConnected && socket) {
@@ -270,20 +230,10 @@ export function ChatArea({
                 tempId, // Para identificar a mensagem temporária
             });
 
-            // Message will be updated when we receive confirmation from server
             setIsSending(false);
         } else {
             console.warn('ChatArea: Socket não conectado, mensagem não enviada');
-
-            // Simulate error
-            setTimeout(() => {
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                        msg.id === tempId ? { ...msg, status: 'error' as const } : msg
-                    )
-                );
-                setIsSending(false);
-            }, 1000);
+            setIsSending(false);
         }
     };
 
@@ -341,6 +291,7 @@ export function ChatArea({
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                         <button
+                            onClick={() => setShowMessageSearch(true)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             title="Buscar mensagens"
                         >
@@ -387,7 +338,15 @@ export function ChatArea({
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto px-6 py-4 space-y-4"
             >
-                {groupedMessages.size === 0 ? (
+                {/* Loading initial messages */}
+                {isLoading && messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                        <Loading size="lg" />
+                        <p className="mt-4 text-gray-600 dark:text-gray-400">
+                            Carregando mensagens...
+                        </p>
+                    </div>
+                ) : groupedMessages.size === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                             <svg
@@ -409,23 +368,40 @@ export function ChatArea({
                         </p>
                     </div>
                 ) : (
-                    Array.from(groupedMessages.entries()).map(([date, msgs]) => (
-                        <div key={date}>
-                            {/* Date Separator */}
-                            <div className="flex items-center justify-center my-6">
-                                <div className="bg-gray-200 dark:bg-gray-700 px-4 py-1 rounded-full">
-                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {date}
-                                    </span>
-                                </div>
+                    <>
+                        {/* Load more trigger (at the top) */}
+                        {hasMore && (
+                            <div ref={loadMoreTriggerRef} className="flex justify-center py-4">
+                                {isLoadingMore && (
+                                    <div className="flex items-center gap-2">
+                                        <Loading size="sm" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            Carregando mais mensagens...
+                                        </span>
+                                    </div>
+                                )}
                             </div>
+                        )}
 
-                            {/* Messages */}
-                            {msgs.map((message) => (
-                                <Message key={message.id} {...message} />
-                            ))}
-                        </div>
-                    ))
+                        {/* Messages grouped by date */}
+                        {Array.from(groupedMessages.entries()).map(([date, msgs]) => (
+                            <div key={date}>
+                                {/* Date Separator */}
+                                <div className="flex items-center justify-center my-6">
+                                    <div className="bg-gray-200 dark:bg-gray-700 px-4 py-1 rounded-full">
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {date}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Messages */}
+                                {msgs.map((message) => (
+                                    <Message key={message.id} {...message} />
+                                ))}
+                            </div>
+                        ))}
+                    </>
                 )}
 
                 {/* Typing Indicator */}
@@ -469,6 +445,19 @@ export function ChatArea({
                 onTyping={handleTyping}
                 disabled={isSending}
             />
+
+            {/* Message Search Modal */}
+            {showMessageSearch && (
+                <MessageSearch
+                    conversationId={conversationId}
+                    onClose={() => setShowMessageSearch(false)}
+                    onSelectMessage={(message) => {
+                        console.log('ChatArea: Mensagem selecionada na busca', message);
+                        // TODO: Scroll to selected message
+                        setShowMessageSearch(false);
+                    }}
+                />
+            )}
         </div>
     );
 }

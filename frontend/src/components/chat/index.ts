@@ -5,3 +5,5 @@ export { ChatArea } from './ChatArea';
 export { Message } from './Message';
 export { MessageInput } from './MessageInput';
 export { TypingIndicator } from './TypingIndicator';
+export { MessageSearch } from './MessageSearch';
+export { UserSearch } from './UserSearch';
