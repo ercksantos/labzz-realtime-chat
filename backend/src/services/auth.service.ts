@@ -8,6 +8,7 @@ import { twoFactorService } from './twoFactor.service';
 import elasticsearchService from './elasticsearch.service';
 import { UserDocument } from '../types/elasticsearch.types';
 import logger from '../utils/logger';
+import emailService from './email.service';
 
 export class AuthService {
     async register(data: RegisterInput) {
@@ -55,6 +56,11 @@ export class AuthService {
         };
         elasticsearchService.indexUser(userDoc).catch((err: any) => {
             logger.error('Erro ao indexar usuário no ES:', err);
+        });
+
+        // Enviar email de boas-vindas
+        emailService.sendWelcomeEmail(user.email, user.name).catch((err: any) => {
+            logger.error('Erro ao enviar email de boas-vindas:', err);
         });
 
         return user;

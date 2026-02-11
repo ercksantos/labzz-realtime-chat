@@ -5,6 +5,7 @@ import logger from '../utils/logger';
 import elasticsearchService from '../services/elasticsearch.service';
 import { MessageDocument } from '../types/elasticsearch.types';
 import cacheService from '../services/cache.service';
+import notificationService from '../services/notification.service';
 
 export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) => {
     // Evento: enviar mensagem
@@ -84,6 +85,35 @@ export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) =>
             participants.forEach((p: { userId: string }) => {
                 io.to(`user:${p.userId}`).emit('new_message', message);
             });
+
+            // Enviar notificações para participantes offline
+            for (const participant of participants) {
+                if (participant.userId !== socket.userId) {
+                    const isOnline = await cacheService.isUserOnline(participant.userId);
+
+                    if (!isOnline) {
+                        // Buscar informações do destinatário
+                        const recipient = await prisma.user.findUnique({
+                            where: { id: participant.userId },
+                            select: { email: true, name: true },
+                        });
+
+                        if (recipient) {
+                            // Enviar notificação
+                            notificationService
+                                .notifyNewMessage(
+                                    participant.userId,
+                                    message.sender.name,
+                                    message.content,
+                                    conversationId
+                                )
+                                .catch((err: any) => {
+                                    logger.error('Erro ao enviar notificação:', err);
+                                });
+                        }
+                    }
+                }
+            }
 
             logger.info(`Message sent: ${message.id} in conversation ${conversationId}`);
         } catch (error) {

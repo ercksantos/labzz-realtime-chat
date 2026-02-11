@@ -9,6 +9,7 @@ import {
 } from './config/elasticsearch';
 import { checkRedisConnection } from './config/redis';
 import cacheService from './services/cache.service';
+import './queue/workers'; // Inicializar workers BullMQ
 import { helmetMiddleware, corsMiddleware } from './middlewares/security';
 import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
