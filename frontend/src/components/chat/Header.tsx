@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Avatar, Badge } from '../ui';
+import { Avatar, Badge, LanguageSelector } from '../ui';
 import { cn } from '@/lib/utils/cn';
 
 interface HeaderProps {
@@ -93,6 +93,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                             </svg>
                         )}
                     </button>
+
+                    {/* Language Selector */}
+                    <LanguageSelector />
 
                     {/* Notifications */}
                     <div className="relative" ref={notificationsRef}>

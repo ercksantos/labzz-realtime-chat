@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, Input, Loading } from '@/components/ui';
 import { env } from '@/config/env';
@@ -21,6 +22,9 @@ function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl') || '/chat';
+    const t = useTranslations('auth');
+    const tCommon = useTranslations('common');
+    const tErrors = useTranslations('errors');
 
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
@@ -68,15 +72,15 @@ function LoginForm() {
                         💬 Labzz Chat
                     </h1>
                     <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-                        Entrar na sua conta
+                        {t('loginTitle')}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Ou{' '}
+                        {t('noAccount')}{' '}
                         <Link
                             href="/register"
                             className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
                         >
-                            criar uma nova conta
+                            {t('createAccount')}
                         </Link>
                     </p>
                 </div>
@@ -93,7 +97,7 @@ function LoginForm() {
 
                         {/* Email */}
                         <Input
-                            label="Email"
+                            label={t('email')}
                             type="email"
                             placeholder="seu@email.com"
                             error={errors.email?.message}
@@ -102,7 +106,7 @@ function LoginForm() {
 
                         {/* Password */}
                         <Input
-                            label="Senha"
+                            label={t('password')}
                             type="password"
                             placeholder="••••••••"
                             error={errors.password?.message}
@@ -115,13 +119,13 @@ function LoginForm() {
                                 href="/forgot-password"
                                 className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
                             >
-                                Esqueceu sua senha?
+                                {t('forgotPassword')}
                             </Link>
                         </div>
 
                         {/* Submit Button */}
                         <Button type="submit" fullWidth isLoading={isLoading} disabled={isLoading}>
-                            Entrar
+                            {t('login')}
                         </Button>
                     </form>
 
@@ -133,7 +137,7 @@ function LoginForm() {
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white dark:bg-dark-card text-gray-500 dark:text-gray-400">
-                                    Ou continue com
+                                    {t('oauth.continueWith')}
                                 </span>
                             </div>
                         </div>

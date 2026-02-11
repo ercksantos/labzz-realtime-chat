@@ -1,0 +1,179 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "close": "Close",
+        "search": "Search",
+        "noResults": "No results found",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "auth": {
+        "login": "Sign in",
+        "logout": "Sign out",
+        "register": "Sign up",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "forgotPassword": "Forgot password?",
+        "rememberMe": "Remember me",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?",
+        "createAccount": "Create account",
+        "loginTitle": "Welcome back",
+        "loginSubtitle": "Sign in to your account to continue",
+        "registerTitle": "Create new account",
+        "registerSubtitle": "Fill in the details below to get started",
+        "name": "Name",
+        "username": "Username",
+        "twoFactor": {
+            "title": "Two-factor verification",
+            "subtitle": "Enter the code from your authenticator app",
+            "code": "Verification code",
+            "verify": "Verify"
+        },
+        "oauth": {
+            "continueWith": "Or continue with",
+            "google": "Google",
+            "github": "GitHub"
+        }
+    },
+    "chat": {
+        "conversations": "Conversations",
+        "newConversation": "New Conversation",
+        "searchConversations": "Search conversations...",
+        "noConversations": "No conversations found",
+        "typeMessage": "Type a message...",
+        "send": "Send",
+        "online": "Online",
+        "offline": "Offline",
+        "typing": "typing...",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "searchMessages": "Search messages",
+        "searchUsers": "Search users",
+        "selectUsers": "Select users",
+        "createConversation": "Create conversation",
+        "sendMessage": "Send message"
+    },
+    "profile": {
+        "title": "My Profile",
+        "subtitle": "Manage your personal information",
+        "editProfile": "Edit profile",
+        "fullName": "Full name",
+        "username": "Username",
+        "email": "Email",
+        "memberSince": "Member since",
+        "lastUpdated": "Last updated",
+        "avatar": {
+            "change": "Change photo",
+            "remove": "Remove",
+            "upload": "Choose file",
+            "preview": "Preview",
+            "save": "Save photo",
+            "autoCircleCrop": "The image will be automatically cropped to a circle"
+        },
+        "saveChanges": "Save changes",
+        "updateSuccess": "Profile updated successfully!",
+        "avatarSuccess": "Profile photo updated successfully!",
+        "quickLinks": {
+            "settings": "Settings",
+            "settingsDesc": "Manage account and preferences",
+            "security": "Security",
+            "securityDesc": "Password and 2FA authentication"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage your account and security preferences",
+        "profile": "Profile",
+        "security": "Security",
+        "backToProfile": "Back to profile",
+        "password": {
+            "title": "Password",
+            "subtitle": "Update your password periodically for better security",
+            "change": "Change",
+            "current": "Current password",
+            "new": "New password",
+            "confirm": "Confirm new password",
+            "save": "Save new password",
+            "success": "Password changed successfully!",
+            "mismatch": "Passwords do not match",
+            "minLength": "New password must be at least 8 characters"
+        },
+        "twoFactor": {
+            "title": "Two-Factor Authentication (2FA)",
+            "enabled": "Enabled - Your account is protected",
+            "disabled": "Disabled - Add an extra layer of security",
+            "enable": "Enable",
+            "disable": "Disable",
+            "setup": {
+                "title": "Set up 2FA Authentication",
+                "scanQR": "Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc.)",
+                "manualEntry": "Or enter manually:",
+                "verificationCode": "Verification code",
+                "verifyAndEnable": "Verify and Enable"
+            },
+            "backupCodes": {
+                "title": "Backup Codes",
+                "warning": "Important: Save these codes in a safe place. Each code can only be used once to access your account if you lose access to your authenticator device.",
+                "saved": "Got it, I saved the codes"
+            },
+            "disableModal": {
+                "title": "Disable 2FA",
+                "warning": "Warning: Disabling two-factor authentication will reduce the security of your account.",
+                "passwordConfirm": "Enter your password to confirm"
+            }
+        },
+        "dangerZone": {
+            "title": "Danger Zone",
+            "subtitle": "Irreversible actions for your account",
+            "deleteAccount": "Delete account",
+            "deleteModal": {
+                "title": "Delete Account",
+                "warning": "This action is irreversible! All your data, messages, and settings will be permanently deleted.",
+                "passwordLabel": "Password",
+                "confirmLabel": "Type DELETE to confirm",
+                "confirmWord": "DELETE",
+                "confirm": "Delete permanently"
+            }
+        }
+    },
+    "navigation": {
+        "chat": "Chat",
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Logout"
+    },
+    "language": {
+        "title": "Language",
+        "select": "Select language",
+        "ptBR": "Português (Brasil)",
+        "enUS": "English (US)"
+    },
+    "theme": {
+        "title": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+    },
+    "errors": {
+        "generic": "An error occurred. Please try again.",
+        "network": "Connection error. Check your internet.",
+        "unauthorized": "Session expired. Please sign in again.",
+        "notFound": "Resource not found.",
+        "validation": "Please check the provided data."
+    },
+    "notifications": {
+        "newMessage": "New message",
+        "newMessageFrom": "New message from {name}"
+    }
+}

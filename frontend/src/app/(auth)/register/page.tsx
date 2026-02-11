@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button, Input } from '@/components/ui';
 import { env } from '@/config/env';
@@ -35,6 +36,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
     const { register: registerUser } = useAuth();
+    const t = useTranslations('auth');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -83,15 +85,15 @@ export default function RegisterPage() {
                         💬 Labzz Chat
                     </h1>
                     <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-                        Criar uma nova conta
+                        {t('registerTitle')}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Ou{' '}
+                        {t('hasAccount')}{' '}
                         <Link
                             href="/login"
                             className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
                         >
-                            entrar com uma conta existente
+                            {t('login')}
                         </Link>
                     </p>
                 </div>
@@ -108,7 +110,7 @@ export default function RegisterPage() {
 
                         {/* Name */}
                         <Input
-                            label="Nome completo"
+                            label={t('name')}
                             type="text"
                             placeholder="João Silva"
                             error={errors.name?.message}
@@ -117,17 +119,16 @@ export default function RegisterPage() {
 
                         {/* Username */}
                         <Input
-                            label="Nome de usuário"
+                            label={t('username')}
                             type="text"
                             placeholder="joao_silva"
                             error={errors.username?.message}
-                            helperText="Apenas letras, números e underscore"
                             {...registerField('username')}
                         />
 
                         {/* Email */}
                         <Input
-                            label="Email"
+                            label={t('email')}
                             type="email"
                             placeholder="joao@email.com"
                             error={errors.email?.message}
@@ -136,17 +137,16 @@ export default function RegisterPage() {
 
                         {/* Password */}
                         <Input
-                            label="Senha"
+                            label={t('password')}
                             type="password"
                             placeholder="••••••••"
                             error={errors.password?.message}
-                            helperText="Mínimo 8 caracteres, com maiúscula, minúscula, número e especial"
                             {...registerField('password')}
                         />
 
                         {/* Confirm Password */}
                         <Input
-                            label="Confirmar senha"
+                            label={t('confirmPassword')}
                             type="password"
                             placeholder="••••••••"
                             error={errors.confirmPassword?.message}
@@ -178,7 +178,7 @@ export default function RegisterPage() {
 
                         {/* Submit Button */}
                         <Button type="submit" fullWidth isLoading={isLoading} disabled={isLoading}>
-                            Criar conta
+                            {t('createAccount')}
                         </Button>
                     </form>
 
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                             </div>
                             <div className="relative flex justify-center text-sm">
                                 <span className="px-2 bg-white dark:bg-dark-card text-gray-500 dark:text-gray-400">
-                                    Ou registre-se com
+                                    {t('oauth.continueWith')}
                                 </span>
                             </div>
                         </div>

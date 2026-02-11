@@ -1,0 +1,179 @@
+{
+    "common": {
+        "loading": "Carregando...",
+        "error": "Erro",
+        "success": "Sucesso",
+        "cancel": "Cancelar",
+        "save": "Salvar",
+        "edit": "Editar",
+        "delete": "Deletar",
+        "confirm": "Confirmar",
+        "back": "Voltar",
+        "next": "Próximo",
+        "close": "Fechar",
+        "search": "Buscar",
+        "noResults": "Nenhum resultado encontrado",
+        "yes": "Sim",
+        "no": "Não"
+    },
+    "auth": {
+        "login": "Entrar",
+        "logout": "Sair",
+        "register": "Cadastrar",
+        "email": "Email",
+        "password": "Senha",
+        "confirmPassword": "Confirmar senha",
+        "forgotPassword": "Esqueceu a senha?",
+        "rememberMe": "Lembrar de mim",
+        "noAccount": "Não tem uma conta?",
+        "hasAccount": "Já tem uma conta?",
+        "createAccount": "Criar conta",
+        "loginTitle": "Bem-vindo de volta",
+        "loginSubtitle": "Entre na sua conta para continuar",
+        "registerTitle": "Criar nova conta",
+        "registerSubtitle": "Preencha os dados abaixo para começar",
+        "name": "Nome",
+        "username": "Nome de usuário",
+        "twoFactor": {
+            "title": "Verificação em duas etapas",
+            "subtitle": "Digite o código do seu aplicativo autenticador",
+            "code": "Código de verificação",
+            "verify": "Verificar"
+        },
+        "oauth": {
+            "continueWith": "Ou continue com",
+            "google": "Google",
+            "github": "GitHub"
+        }
+    },
+    "chat": {
+        "conversations": "Conversas",
+        "newConversation": "Nova Conversa",
+        "searchConversations": "Buscar conversas...",
+        "noConversations": "Nenhuma conversa encontrada",
+        "typeMessage": "Digite uma mensagem...",
+        "send": "Enviar",
+        "online": "Online",
+        "offline": "Offline",
+        "typing": "digitando...",
+        "today": "Hoje",
+        "yesterday": "Ontem",
+        "searchMessages": "Buscar mensagens",
+        "searchUsers": "Buscar usuários",
+        "selectUsers": "Selecione os usuários",
+        "createConversation": "Criar conversa",
+        "sendMessage": "Enviar mensagem"
+    },
+    "profile": {
+        "title": "Meu Perfil",
+        "subtitle": "Gerencie suas informações pessoais",
+        "editProfile": "Editar perfil",
+        "fullName": "Nome completo",
+        "username": "Nome de usuário",
+        "email": "Email",
+        "memberSince": "Membro desde",
+        "lastUpdated": "Última atualização",
+        "avatar": {
+            "change": "Alterar foto",
+            "remove": "Remover",
+            "upload": "Escolher arquivo",
+            "preview": "Pré-visualização",
+            "save": "Salvar foto",
+            "autoCircleCrop": "A imagem será recortada automaticamente para um círculo"
+        },
+        "saveChanges": "Salvar alterações",
+        "updateSuccess": "Perfil atualizado com sucesso!",
+        "avatarSuccess": "Foto de perfil atualizada com sucesso!",
+        "quickLinks": {
+            "settings": "Configurações",
+            "settingsDesc": "Gerenciar conta e preferências",
+            "security": "Segurança",
+            "securityDesc": "Senha e autenticação 2FA"
+        }
+    },
+    "settings": {
+        "title": "Configurações",
+        "subtitle": "Gerencie sua conta e preferências de segurança",
+        "profile": "Perfil",
+        "security": "Segurança",
+        "backToProfile": "Voltar para o perfil",
+        "password": {
+            "title": "Senha",
+            "subtitle": "Atualize sua senha periodicamente para maior segurança",
+            "change": "Alterar",
+            "current": "Senha atual",
+            "new": "Nova senha",
+            "confirm": "Confirmar nova senha",
+            "save": "Salvar nova senha",
+            "success": "Senha alterada com sucesso!",
+            "mismatch": "As senhas não coincidem",
+            "minLength": "A nova senha deve ter pelo menos 8 caracteres"
+        },
+        "twoFactor": {
+            "title": "Autenticação de Dois Fatores (2FA)",
+            "enabled": "Ativado - Sua conta está protegida",
+            "disabled": "Desativado - Adicione uma camada extra de segurança",
+            "enable": "Ativar",
+            "disable": "Desativar",
+            "setup": {
+                "title": "Configurar Autenticação 2FA",
+                "scanQR": "Escaneie o QR Code abaixo com seu aplicativo autenticador (Google Authenticator, Authy, etc.)",
+                "manualEntry": "Ou digite manualmente:",
+                "verificationCode": "Código de verificação",
+                "verifyAndEnable": "Verificar e Ativar"
+            },
+            "backupCodes": {
+                "title": "Códigos de Backup",
+                "warning": "Importante: Salve estes códigos em um lugar seguro. Cada código pode ser usado apenas uma vez para acessar sua conta se você perder acesso ao seu dispositivo autenticador.",
+                "saved": "Entendi, salvei os códigos"
+            },
+            "disableModal": {
+                "title": "Desativar 2FA",
+                "warning": "Atenção: Desativar a autenticação de dois fatores reduzirá a segurança da sua conta.",
+                "passwordConfirm": "Digite sua senha para confirmar"
+            }
+        },
+        "dangerZone": {
+            "title": "Zona de Perigo",
+            "subtitle": "Ações irreversíveis para sua conta",
+            "deleteAccount": "Deletar conta",
+            "deleteModal": {
+                "title": "Deletar Conta",
+                "warning": "Esta ação é irreversível! Todos os seus dados, mensagens e configurações serão permanentemente excluídos.",
+                "passwordLabel": "Senha",
+                "confirmLabel": "Digite DELETAR para confirmar",
+                "confirmWord": "DELETAR",
+                "confirm": "Deletar permanentemente"
+            }
+        }
+    },
+    "navigation": {
+        "chat": "Chat",
+        "profile": "Perfil",
+        "settings": "Configurações",
+        "logout": "Sair"
+    },
+    "language": {
+        "title": "Idioma",
+        "select": "Selecionar idioma",
+        "ptBR": "Português (Brasil)",
+        "enUS": "English (US)"
+    },
+    "theme": {
+        "title": "Tema",
+        "light": "Claro",
+        "dark": "Escuro",
+        "system": "Sistema"
+    },
+    "errors": {
+        "generic": "Ocorreu um erro. Tente novamente.",
+        "network": "Erro de conexão. Verifique sua internet.",
+        "unauthorized": "Sessão expirada. Faça login novamente.",
+        "notFound": "Recurso não encontrado.",
+        "validation": "Verifique os dados informados."
+    },
+    "notifications": {
+        "newMessage": "Nova mensagem",
+        "newMessageFrom": "Nova mensagem de {name}"
+    }
+}
