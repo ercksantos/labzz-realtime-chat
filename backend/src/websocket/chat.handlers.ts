@@ -4,6 +4,7 @@ import prisma from '../config/database';
 import logger from '../utils/logger';
 import elasticsearchService from '../services/elasticsearch.service';
 import { MessageDocument } from '../types/elasticsearch.types';
+import cacheService from '../services/cache.service';
 
 export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) => {
     // Evento: enviar mensagem
@@ -74,6 +75,10 @@ export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) =>
                 where: { conversationId },
                 select: { userId: true },
             });
+
+            // Invalidar cache de conversas de todos os participantes
+            const participantIds = participants.map((p) => p.userId);
+            await cacheService.invalidateConversationCache(conversationId, participantIds);
 
             // Emitir mensagem para todos os participantes (incluindo o remetente)
             participants.forEach((p: { userId: string }) => {

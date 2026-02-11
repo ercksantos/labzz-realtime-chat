@@ -5,6 +5,7 @@ import oauthRoutes from './oauth.routes';
 import userRoutes from './user.routes';
 import chatRoutes from './chat.routes';
 import searchRoutes from './search.routes';
+import cacheRoutes from './cache.routes';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use('/oauth', oauthRoutes);
 router.use('/users', userRoutes);
 router.use('/chat', chatRoutes);
 router.use('/search', searchRoutes);
+router.use('/cache', cacheRoutes);
 
 router.get('/', (_req, res) => {
     res.json({
@@ -24,6 +26,7 @@ router.get('/', (_req, res) => {
             users: '/api/users',
             chat: '/api/chat',
             search: '/api/search',
+            cache: '/api/cache',
             health: '/health',
         },
     });

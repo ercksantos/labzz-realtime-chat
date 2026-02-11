@@ -3,6 +3,7 @@ import { AuthenticatedSocket } from './auth.middleware';
 import prisma from '../config/database';
 import logger from '../utils/logger';
 import elasticsearchService from '../services/elasticsearch.service';
+import cacheService from '../services/cache.service';
 
 export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket) => {
     // Usuário ficou online
@@ -14,6 +15,13 @@ export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket
                     isOnline: true,
                     lastSeen: new Date(),
                 },
+            });
+
+            // Adicionar ao cache de usuários online
+            await cacheService.setUserOnline(socket.userId!, {
+                id: socket.userId,
+                username: socket.username,
+                isOnline: true,
             });
 
             // Atualizar status no Elasticsearch
@@ -43,6 +51,9 @@ export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket
                     lastSeen: new Date(),
                 },
             });
+
+            // Remover do cache de usuários online
+            await cacheService.setUserOffline(socket.userId!);
 
             // Atualizar status no Elasticsearch
             elasticsearchService.updateUserOnlineStatus(socket.userId!, false).catch((err: any) => {

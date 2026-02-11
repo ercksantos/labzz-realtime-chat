@@ -7,6 +7,8 @@ import {
     checkElasticsearchConnection,
     initializeElasticsearchIndices,
 } from './config/elasticsearch';
+import { checkRedisConnection } from './config/redis';
+import cacheService from './services/cache.service';
 import { helmetMiddleware, corsMiddleware } from './middlewares/security';
 import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
@@ -31,13 +33,23 @@ app.use(corsMiddleware);
 app.use(requestLogger);
 app.use(generalLimiter);
 
-app.get('/health', (_req, res) => {
+app.get('/health', async (_req, res) => {
+    const redisHealth = await cacheService.healthCheck();
+    const esConnected = await checkElasticsearchConnection();
+
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: config.nodeEnv,
-        database: 'connected',
+        services: {
+            database: 'connected',
+            redis: redisHealth.connected ? 'connected' : 'disconnected',
+            elasticsearch: esConnected ? 'connected' : 'disconnected',
+        },
+        cache: {
+            memory: redisHealth.memory,
+        },
     });
 });
 
@@ -47,6 +59,12 @@ app.use(errorHandler);
 
 // Inicializar serviços antes de iniciar o servidor
 const initializeServices = async () => {
+    // Verificar e inicializar Redis
+    const redisConnected = await checkRedisConnection();
+    if (!redisConnected) {
+        logger.warn('⚠️  Servidor iniciará sem Redis (cache desabilitado)');
+    }
+
     // Verificar e inicializar Elasticsearch
     const esConnected = await checkElasticsearchConnection();
     if (esConnected) {

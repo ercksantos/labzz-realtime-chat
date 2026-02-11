@@ -1,6 +1,8 @@
 import prisma from '../config/database';
 import { AppError } from '../middlewares/errorHandler';
 import { CreateConversationInput } from '../validators/chat.validator';
+import cacheService from './cache.service';
+import logger from '../utils/logger';
 
 export class ChatService {
     async createConversation(userId: string, data: CreateConversationInput) {
@@ -81,6 +83,13 @@ export class ChatService {
     }
 
     async getUserConversations(userId: string) {
+        // Tentar buscar do cache
+        const cached = await cacheService.getUserConversations(userId);
+        if (cached) {
+            logger.debug('Conversas do usuário carregadas do cache');
+            return cached;
+        }
+
         const conversations = await prisma.conversation.findMany({
             where: {
                 participants: {
@@ -120,6 +129,9 @@ export class ChatService {
             },
             orderBy: { updatedAt: 'desc' },
         });
+
+        // Salvar no cache
+        await cacheService.setUserConversations(userId, conversations);
 
         return conversations;
     }
@@ -191,10 +203,20 @@ export class ChatService {
             throw new AppError('You are not a participant of this conversation', 403);
         }
 
+        // Buscar todos os participantes antes de deletar
+        const participants = await prisma.conversationParticipant.findMany({
+            where: { conversationId },
+            select: { userId: true },
+        });
+
         // Deletar a conversa (cascade deleta mensagens e participantes)
         await prisma.conversation.delete({
             where: { id: conversationId },
         });
+
+        // Invalidar cache
+        const participantIds = participants.map((p) => p.userId);
+        await cacheService.invalidateConversationCache(conversationId, participantIds);
 
         return { message: 'Conversation deleted successfully' };
     }
