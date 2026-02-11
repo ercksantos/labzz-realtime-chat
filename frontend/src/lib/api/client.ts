@@ -47,11 +47,9 @@ class ApiClient {
 
                         return this.client(originalRequest);
                     } catch (refreshError) {
-                        // Refresh falhou, limpa tokens e redireciona
+                        // Refresh falhou, limpa tokens
+                        // Não redireciona automaticamente - deixa ProtectedRoute fazer isso
                         this.clearTokens();
-                        if (typeof window !== 'undefined') {
-                            window.location.href = '/login';
-                        }
                         return Promise.reject(refreshError);
                     }
                 }

@@ -63,7 +63,23 @@ export class AuthService {
             logger.error('Erro ao enviar email de boas-vindas:', err);
         });
 
-        return user;
+        // Gerar tokens para login automático
+        const tokenPayload = {
+            userId: user.id,
+            email: user.email,
+            username: user.username,
+        };
+
+        const accessToken = jwtService.generateAccessToken(tokenPayload);
+        const refreshToken = jwtService.generateRefreshToken(tokenPayload);
+
+        return {
+            user,
+            tokens: {
+                accessToken,
+                refreshToken,
+            },
+        };
     }
 
     async login(data: LoginInput) {

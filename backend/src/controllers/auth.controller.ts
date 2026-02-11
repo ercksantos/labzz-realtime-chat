@@ -14,13 +14,13 @@ export class AuthController {
     async register(req: Request, res: Response, next: NextFunction) {
         try {
             const validatedData = registerSchema.parse(req.body);
-            const user = await authService.register(validatedData);
+            const result = await authService.register(validatedData);
 
-            logger.info(`New user registered: ${user.email}`);
+            logger.info(`New user registered: ${result.user.email}`);
 
             res.status(201).json({
                 status: 'success',
-                data: { user },
+                data: result,
             });
         } catch (error) {
             if (error instanceof ZodError) {

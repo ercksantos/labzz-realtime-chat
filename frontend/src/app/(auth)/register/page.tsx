@@ -54,7 +54,16 @@ export default function RegisterPage() {
             const { confirmPassword, ...registerData } = data;
             await registerUser(registerData);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Erro ao criar conta');
+            console.error('Register error:', err);
+
+            // Tratamento específico de erros
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else if (err.message) {
+                setError(err.message);
+            } else {
+                setError('Erro ao criar conta. Tente novamente.');
+            }
         } finally {
             setIsLoading(false);
         }

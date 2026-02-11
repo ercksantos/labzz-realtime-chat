@@ -27,7 +27,23 @@ export const helmetMiddleware = helmet({
 });
 
 export const corsMiddleware = cors({
-    origin: config.frontend.url,
+    origin: (origin, callback) => {
+        // Permitir requisições sem origin (ex: Postman, curl)
+        if (!origin) return callback(null, true);
+
+        // Permitir múltiplas origens do frontend
+        const allowedOrigins = [
+            config.frontend.url,
+            'http://localhost:3000',
+            'http://localhost:3001',
+        ];
+
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

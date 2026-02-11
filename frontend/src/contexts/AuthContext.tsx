@@ -36,14 +36,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const isAuthenticated = !!user;
 
-    // Carregar usuário ao montar
+    // Carregar usuário ao montar - apenas se houver token
     useEffect(() => {
         const loadUser = async () => {
             try {
-                const currentUser = await authService.getCurrentUser();
-                setUser(currentUser);
+                // Só tenta carregar se houver um token
+                const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+                if (token) {
+                    const currentUser = await authService.getCurrentUser();
+                    setUser(currentUser);
+                } else {
+                    setUser(null);
+                }
             } catch (error) {
-                // Usuário não autenticado
+                // Usuário não autenticado ou token inválido
                 setUser(null);
             } finally {
                 setIsLoading(false);
@@ -72,9 +78,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const register = useCallback(
         async (data: RegisterData) => {
-            const authData = await authService.register(data);
-            setUser(authData.user);
-            router.push('/chat');
+            try {
+                console.log('Register: sending data', { ...data, password: '[REDACTED]' });
+                const authData = await authService.register(data);
+                console.log('Register: success', authData.user);
+                setUser(authData.user);
+                router.push('/chat');
+            } catch (error: any) {
+                console.error('Register: error', error);
+                throw error;
+            }
         },
         [router]
     );
