@@ -5,6 +5,9 @@ import { RegisterInput, LoginInput } from '../validators/auth.validator';
 import { jwtService } from '../utils/jwt';
 import { config } from '../config';
 import { twoFactorService } from './twoFactor.service';
+import elasticsearchService from './elasticsearch.service';
+import { UserDocument } from '../types/elasticsearch.types';
+import logger from '../utils/logger';
 
 export class AuthService {
     async register(data: RegisterInput) {
@@ -38,6 +41,20 @@ export class AuthService {
                 avatar: true,
                 createdAt: true,
             },
+        });
+
+        // Indexar usuário no Elasticsearch
+        const userDoc: UserDocument = {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            name: user.name,
+            avatar: user.avatar,
+            isOnline: false,
+            createdAt: user.createdAt,
+        };
+        elasticsearchService.indexUser(userDoc).catch((err: any) => {
+            logger.error('Erro ao indexar usuário no ES:', err);
         });
 
         return user;

@@ -24,7 +24,6 @@ export class ElasticsearchService {
             logger.debug(`Mensagem ${message.id} indexada no Elasticsearch`);
         } catch (error) {
             logger.error('Erro ao indexar mensagem no Elasticsearch:', error);
-            // Não lançar erro para não quebrar o fluxo normal
         }
     }
 
@@ -104,23 +103,21 @@ export class ElasticsearchService {
                 });
             }
 
-            const sortOrder =
+            const sortOrder: any =
                 params.sortBy === 'date'
-                    ? [{ createdAt: { order: 'desc' } }]
-                    : [{ _score: { order: 'desc' } }, { createdAt: { order: 'desc' } }];
+                    ? [{ createdAt: { order: 'desc' as const } }]
+                    : [{ _score: { order: 'desc' as const } }, { createdAt: { order: 'desc' as const } }];
 
             const response = await esClient.search({
                 index: 'messages',
-                body: {
-                    query: {
-                        bool: {
-                            must: mustClauses,
-                        },
+                query: {
+                    bool: {
+                        must: mustClauses,
                     },
-                    sort: sortOrder,
-                    from: params.from || 0,
-                    size: params.size || 20,
                 },
+                sort: sortOrder,
+                from: params.from || 0,
+                size: params.size || 20,
             });
 
             return {
@@ -163,17 +160,15 @@ export class ElasticsearchService {
         try {
             const response = await esClient.search({
                 index: 'users',
-                body: {
-                    query: {
-                        multi_match: {
-                            query: params.query,
-                            fields: ['name^2', 'username^1.5', 'email'],
-                            fuzziness: 'AUTO',
-                        },
+                query: {
+                    multi_match: {
+                        query: params.query,
+                        fields: ['name^2', 'username^1.5', 'email'],
+                        fuzziness: 'AUTO',
                     },
-                    from: params.from || 0,
-                    size: params.size || 20,
                 },
+                from: params.from || 0,
+                size: params.size || 20,
             });
 
             return {

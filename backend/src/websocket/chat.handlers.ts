@@ -59,7 +59,7 @@ export const registerChatHandlers = (io: Server, socket: AuthenticatedSocket) =>
                 createdAt: message.createdAt,
                 updatedAt: message.updatedAt,
             };
-            elasticsearchService.indexMessage(messageDoc).catch((err) => {
+            elasticsearchService.indexMessage(messageDoc).catch((err: any) => {
                 logger.error('Erro ao indexar mensagem no ES:', err);
             });
 

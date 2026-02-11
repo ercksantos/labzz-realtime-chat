@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { AuthenticatedSocket } from './auth.middleware';
 import prisma from '../config/database';
 import logger from '../utils/logger';
+import elasticsearchService from '../services/elasticsearch.service';
 
 export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket) => {
     // Usuário ficou online
@@ -13,6 +14,11 @@ export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket
                     isOnline: true,
                     lastSeen: new Date(),
                 },
+            });
+
+            // Atualizar status no Elasticsearch
+            elasticsearchService.updateUserOnlineStatus(socket.userId!, true).catch((err: any) => {
+                logger.error('Erro ao atualizar status online no ES:', err);
             });
 
             // Notificar outros usuários
@@ -36,6 +42,11 @@ export const registerPresenceHandlers = (io: Server, socket: AuthenticatedSocket
                     isOnline: false,
                     lastSeen: new Date(),
                 },
+            });
+
+            // Atualizar status no Elasticsearch
+            elasticsearchService.updateUserOnlineStatus(socket.userId!, false).catch((err: any) => {
+                logger.error('Erro ao atualizar status offline no ES:', err);
             });
 
             // Notificar outros usuários

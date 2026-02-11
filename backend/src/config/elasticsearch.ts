@@ -37,23 +37,21 @@ export const initializeElasticsearchIndices = async () => {
         if (!messagesIndexExists) {
             await esClient.indices.create({
                 index: 'messages',
-                body: {
-                    mappings: {
-                        properties: {
-                            id: { type: 'keyword' },
-                            content: { type: 'text', analyzer: 'standard' },
-                            senderId: { type: 'keyword' },
-                            senderName: { type: 'text' },
-                            senderUsername: { type: 'keyword' },
-                            conversationId: { type: 'keyword' },
-                            createdAt: { type: 'date' },
-                            updatedAt: { type: 'date' },
-                        },
+                mappings: {
+                    properties: {
+                        id: { type: 'keyword' },
+                        content: { type: 'text', analyzer: 'standard' },
+                        senderId: { type: 'keyword' },
+                        senderName: { type: 'text' },
+                        senderUsername: { type: 'keyword' },
+                        conversationId: { type: 'keyword' },
+                        createdAt: { type: 'date' },
+                        updatedAt: { type: 'date' },
                     },
-                    settings: {
-                        number_of_shards: 1,
-                        number_of_replicas: 1,
-                    },
+                },
+                settings: {
+                    number_of_shards: 1,
+                    number_of_replicas: 1,
                 },
             });
             logger.info('✅ Índice "messages" criado no Elasticsearch');
@@ -67,22 +65,20 @@ export const initializeElasticsearchIndices = async () => {
         if (!usersIndexExists) {
             await esClient.indices.create({
                 index: 'users',
-                body: {
-                    mappings: {
-                        properties: {
-                            id: { type: 'keyword' },
-                            email: { type: 'keyword' },
-                            username: { type: 'keyword' },
-                            name: { type: 'text', analyzer: 'standard' },
-                            avatar: { type: 'keyword' },
-                            isOnline: { type: 'boolean' },
-                            createdAt: { type: 'date' },
-                        },
+                mappings: {
+                    properties: {
+                        id: { type: 'keyword' },
+                        email: { type: 'keyword' },
+                        username: { type: 'keyword' },
+                        name: { type: 'text', analyzer: 'standard' },
+                        avatar: { type: 'keyword' },
+                        isOnline: { type: 'boolean' },
+                        createdAt: { type: 'date' },
                     },
-                    settings: {
-                        number_of_shards: 1,
-                        number_of_replicas: 1,
-                    },
+                },
+                settings: {
+                    number_of_shards: 1,
+                    number_of_replicas: 1,
                 },
             });
             logger.info('✅ Índice "users" criado no Elasticsearch');

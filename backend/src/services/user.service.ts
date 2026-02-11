@@ -1,6 +1,8 @@
 import prisma from '../config/database';
 import { AppError } from '../middlewares/errorHandler';
 import { UpdateUserInput } from '../validators/user.validator';
+import elasticsearchService from './elasticsearch.service';
+import logger from '../utils/logger';
 
 export class UserService {
     async listUsers(page: number = 1, limit: number = 10, search?: string) {
@@ -106,6 +108,21 @@ export class UserService {
                 updatedAt: true,
             },
         });
+
+        // Atualizar usuário no Elasticsearch
+        elasticsearchService
+            .indexUser({
+                id: updatedUser.id,
+                email: updatedUser.email,
+                username: updatedUser.username,
+                name: updatedUser.name,
+                avatar: updatedUser.avatar,
+                isOnline: updatedUser.isOnline,
+                createdAt: updatedUser.createdAt,
+            })
+            .catch((err: any) => {
+                logger.error('Erro ao atualizar usuário no ES:', err);
+            });
 
         return updatedUser;
     }
