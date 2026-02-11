@@ -10,7 +10,14 @@ import {
 import { checkRedisConnection } from './config/redis';
 import cacheService from './services/cache.service';
 import './queue/workers'; // Inicializar workers BullMQ
-import { helmetMiddleware, corsMiddleware } from './middlewares/security';
+import {
+    helmetMiddleware,
+    corsMiddleware,
+    mongoSanitizeMiddleware,
+    xssMiddleware,
+    sanitizeInputs,
+    httpsRedirect,
+} from './middlewares/security';
 import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
@@ -29,8 +36,13 @@ const PORT = config.port;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middlewares de segurança
+app.use(httpsRedirect);
 app.use(helmetMiddleware);
 app.use(corsMiddleware);
+app.use(mongoSanitizeMiddleware);
+app.use(xssMiddleware);
+app.use(sanitizeInputs);
 app.use(requestLogger);
 app.use(generalLimiter);
 

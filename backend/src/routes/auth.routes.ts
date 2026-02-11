@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { authLimiter } from '../middlewares/rateLimiter';
+import { getCsrfToken } from '../middlewares/csrf.middleware';
 
 const router = Router();
 
@@ -11,5 +12,6 @@ router.post('/verify-2fa', authLimiter, authController.verify2FA.bind(authContro
 router.post('/refresh', authController.refreshToken.bind(authController));
 router.post('/logout', authController.logout.bind(authController));
 router.get('/me', authMiddleware, authController.getMe.bind(authController));
+router.get('/csrf-token', getCsrfToken);
 
 export default router;
