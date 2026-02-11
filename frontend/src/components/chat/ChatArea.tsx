@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Message, MessageProps } from './Message';
 import { MessageInput } from './MessageInput';
 import { TypingIndicator } from './TypingIndicator';
-import { Avatar, Badge } from '../ui';
+import { Avatar } from '../ui';
 import { cn } from '@/lib/utils/cn';
 import { groupMessagesByDate } from '@/lib/utils/dateUtils';
+import { useSocket } from '@/contexts/SocketContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Mock data - será substituído por dados reais do backend
 const mockMessages: MessageProps[] = [
@@ -80,12 +82,16 @@ export function ChatArea({
     conversationAvatar,
     isOnline = true,
 }: ChatAreaProps) {
-    const [messages, setMessages] = useState<MessageProps[]>(mockMessages);
+    const [messages, setMessages] = useState<MessageProps[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const { socket, isConnected, emit, on, off } = useSocket();
+    const { user } = useAuth();
 
     // Auto-scroll to bottom on new messages
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -98,6 +104,132 @@ export function ChatArea({
         }
     }, [messages, shouldAutoScroll]);
 
+    // Socket: Load conversation messages on mount
+    useEffect(() => {
+        if (!conversationId || !isConnected) return;
+
+        console.log('ChatArea: Solicitando mensagens da conversa', conversationId);
+        emit('conversation:join', { conversationId });
+
+        // TODO: Load message history from API
+        // For now, using mock data
+        setMessages(mockMessages);
+
+        return () => {
+            console.log('ChatArea: Saindo da conversa', conversationId);
+            emit('conversation:leave', { conversationId });
+        };
+    }, [conversationId, isConnected, emit]);
+
+    // Socket: Listen for incoming messages
+    useEffect(() => {
+        if (!isConnected) return;
+
+        const handleNewMessage = (data: any) => {
+            console.log('ChatArea: Nova mensagem recebida', data);
+
+            const newMessage: MessageProps = {
+                id: data.id || data.messageId,
+                content: data.content || data.message,
+                senderId: data.senderId || data.userId,
+                senderName: data.senderName || data.user?.name || 'Usuário',
+                senderUsername: data.senderUsername || data.user?.username || 'user',
+                senderAvatar: data.senderAvatar || data.user?.avatar,
+                createdAt: new Date(data.createdAt || Date.now()),
+                isOwn: data.senderId === user?.id,
+                status: 'delivered',
+            };
+
+            setMessages((prev) => {
+                // Avoid duplicates
+                if (prev.some((msg) => msg.id === newMessage.id)) {
+                    return prev;
+                }
+                return [...prev, newMessage];
+            });
+
+            // Update message status to sent if it was our message
+            if (newMessage.isOwn) {
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id.startsWith('temp-') && msg.content === newMessage.content
+                            ? { ...msg, id: newMessage.id, status: 'sent' }
+                            : msg
+                    )
+                );
+            }
+        };
+
+        const handleTypingStart = (data: any) => {
+            console.log('ChatArea: Usuário digitando', data);
+            if (data.userId !== user?.id) {
+                setIsTyping(true);
+
+                // Clear existing timeout
+                if (typingTimeoutRef.current) {
+                    clearTimeout(typingTimeoutRef.current);
+                }
+
+                // Set new timeout to hide typing indicator
+                typingTimeoutRef.current = setTimeout(() => {
+                    setIsTyping(false);
+                }, 3000);
+            }
+        };
+
+        const handleTypingStop = (data: any) => {
+            console.log('ChatArea: Usuário parou de digitando', data);
+            if (data.userId !== user?.id) {
+                setIsTyping(false);
+                if (typingTimeoutRef.current) {
+                    clearTimeout(typingTimeoutRef.current);
+                }
+            }
+        };
+
+        const handleMessageDelivered = (data: any) => {
+            console.log('ChatArea: Mensagem entregue', data);
+            setMessages((prev) =>
+                prev.map((msg) =>
+                    msg.id === data.messageId
+                        ? { ...msg, status: 'delivered' as const }
+                        : msg
+                )
+            );
+        };
+
+        const handleMessageRead = (data: any) => {
+            console.log('ChatArea: Mensagem lida', data);
+            setMessages((prev) =>
+                prev.map((msg) =>
+                    msg.id === data.messageId
+                        ? { ...msg, status: 'read' as const }
+                        : msg
+                )
+            );
+        };
+
+        // Register socket listeners
+        on('message:new', handleNewMessage);
+        on('typing:start', handleTypingStart);
+        on('typing:stop', handleTypingStop);
+        on('message:delivered', handleMessageDelivered);
+        on('message:read', handleMessageRead);
+
+        return () => {
+            // Cleanup listeners
+            off('message:new', handleNewMessage);
+            off('typing:start', handleTypingStart);
+            off('typing:stop', handleTypingStop);
+            off('message:delivered', handleMessageDelivered);
+            off('message:read', handleMessageRead);
+
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, [isConnected, user, on, off]);
+
     // Check if user is near bottom to enable/disable auto-scroll
     const handleScroll = () => {
         if (!messagesContainerRef.current) return;
@@ -108,18 +240,19 @@ export function ChatArea({
     };
 
     const handleSendMessage = async (content: string) => {
-        if (!content.trim() || isSending) return;
+        if (!content.trim() || isSending || !conversationId) return;
 
         setIsSending(true);
 
         // Optimistic update - add message immediately
+        const tempId = `temp-${Date.now()}`;
         const newMessage: MessageProps = {
-            id: `temp-${Date.now()}`,
+            id: tempId,
             content,
-            senderId: '1',
-            senderName: 'Você',
-            senderUsername: 'voce',
-            senderAvatar: undefined,
+            senderId: user?.id || '1',
+            senderName: user?.name || 'Você',
+            senderUsername: user?.username || 'voce',
+            senderAvatar: user?.avatar || undefined,
             createdAt: new Date(),
             isOwn: true,
             status: 'sending',
@@ -127,36 +260,56 @@ export function ChatArea({
 
         setMessages((prev) => [...prev, newMessage]);
 
-        // Simulate API call
-        setTimeout(() => {
-            setMessages((prev) =>
-                prev.map((msg) =>
-                    msg.id === newMessage.id ? { ...msg, status: 'sent' as const } : msg
-                )
-            );
+        // Send via WebSocket if connected
+        if (isConnected && socket) {
+            console.log('ChatArea: Enviando mensagem via socket', { conversationId, content });
+
+            emit('message:send', {
+                conversationId,
+                content,
+                tempId, // Para identificar a mensagem temporária
+            });
+
+            // Message will be updated when we receive confirmation from server
             setIsSending(false);
-        }, 1000);
+        } else {
+            console.warn('ChatArea: Socket não conectado, mensagem não enviada');
 
-        // TODO: Replace with actual API call
-        // await sendMessage(conversationId, content);
+            // Simulate error
+            setTimeout(() => {
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === tempId ? { ...msg, status: 'error' as const } : msg
+                    )
+                );
+                setIsSending(false);
+            }, 1000);
+        }
     };
 
-    const handleTyping = () => {
-        // TODO: Emit typing event via WebSocket
-        // socket.emit('typing', { conversationId });
-    };
+    const handleTyping = useCallback(() => {
+        if (!conversationId || !isConnected) return;
+
+        console.log('ChatArea: Emitindo evento de digitação');
+        emit('typing:start', { conversationId });
+
+        // Stop typing after 2 seconds of inactivity
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+            emit('typing:stop', { conversationId });
+        }, 2000);
+    }, [conversationId, isConnected, emit]);
 
     // Group messages by date
     const groupedMessages = groupMessagesByDate(messages);
 
-    // Simulate typing indicator (for demo)
+    // Display connection status (for debugging)
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            setIsTyping(false);
-        }, 3000);
-
-        return () => clearTimeout(timeout);
-    }, [isTyping]);
+        console.log('ChatArea: Socket conectado?', isConnected);
+    }, [isConnected]);
 
     return (
         <div className="flex flex-col h-full bg-gray-50 dark:bg-dark-bg">
@@ -176,6 +329,11 @@ export function ChatArea({
                             </h2>
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {isOnline ? 'Online' : 'Offline'}
+                                {!isConnected && (
+                                    <span className="ml-2 text-red-500">
+                                        • Desconectado
+                                    </span>
+                                )}
                             </p>
                         </div>
                     </div>
