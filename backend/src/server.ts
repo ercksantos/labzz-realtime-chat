@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import express, { Application } from 'express';
 import { createServer } from 'http';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
+import { swaggerSpec } from './config/swagger';
 import { initializeSocket } from './config/socket';
 import {
     checkElasticsearchConnection,
@@ -20,8 +22,10 @@ import {
 } from './middlewares/security';
 import { generalLimiter } from './middlewares/rateLimiter';
 import { requestLogger } from './middlewares/requestLogger';
+import { metricsMiddleware } from './middlewares/metrics.middleware';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
+import register from './config/metrics';
 import apiRoutes from './routes';
 
 const app: Application = express();
@@ -44,6 +48,7 @@ app.use(mongoSanitizeMiddleware);
 app.use(xssMiddleware);
 app.use(sanitizeInputs);
 app.use(requestLogger);
+app.use(metricsMiddleware); // Coletar métricas HTTP
 app.use(generalLimiter);
 
 app.get('/health', async (_req, res) => {
@@ -65,6 +70,18 @@ app.get('/health', async (_req, res) => {
         },
     });
 });
+
+// Métricas Prometheus
+app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+});
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Labzz Chat API',
+}));
 
 app.use('/api', apiRoutes);
 app.use(notFoundHandler);
