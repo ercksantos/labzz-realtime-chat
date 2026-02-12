@@ -158,7 +158,13 @@ labzz-realtime-chat/
 │   └── ARCHITECTURE.md   # Arquitetura do sistema
 │
 ├── docker/               # Arquivos Docker customizados
-├── docker-compose.yml    # Orquestração de containers
+├── .github/              # GitHub Actions CI/CD
+│   └── workflows/
+│       └── ci.yml
+├── docker-compose.yml    # Containers de desenvolvimento
+├── docker-compose.prod.yml # Containers de produção
+├── DEPLOY_GUIDE.md       # Guia detalhado de deploy
+├── CHANGELOG.md          # Histórico de mudanças
 └── README.md             # Este arquivo
 ```
 
@@ -195,22 +201,49 @@ npm run test:e2e            # Testes E2E com Playwright
 
 **Meta de cobertura:** >80% em ambos backend e frontend
 
+## � Docker (Produção)
+
+Build e execução completa da aplicação com Docker:
+
+```bash
+# Build e iniciar todos os serviços
+docker compose -f docker-compose.prod.yml up --build -d
+
+# Ver logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Parar
+docker compose -f docker-compose.prod.yml down
+```
+
+Imagens Docker otimizadas com multi-stage build:
+- **Backend:** ~150MB (Node.js Alpine + dist compilado)
+- **Frontend:** ~120MB (Next.js standalone output)
+
+## 🔄 CI/CD
+
+Pipeline automatizado com **GitHub Actions** (`.github/workflows/ci.yml`):
+
+| Job | Descrição |
+|-----|-----------|
+| `backend-lint` | ESLint no código backend |
+| `backend-test` | Testes unitários com PostgreSQL e Redis |
+| `backend-build` | Compilação TypeScript |
+| `frontend-lint` | ESLint no código frontend |
+| `frontend-test` | Testes de componentes |
+| `frontend-build` | Build Next.js |
+| `docker-build` | Build das imagens Docker (apenas main) |
+
 ## 🚢 Deploy
 
-### Backend
-Opções recomendadas:
-- **Railway** - Deploy fácil com PostgreSQL incluído
-- **Render** - Free tier generoso
-- **AWS** - Para produção escalável
+Consulte o [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md) para instruções detalhadas.
 
-### Frontend
-Opções recomendadas:
-- **Vercel** - Otimizado para Next.js
-- **Netlify** - Alternativa sólida
-
-### Banco de Dados
-- **Supabase** - PostgreSQL gerenciado com free tier
-- **Railway** - PostgreSQL incluído no deploy
+| Serviço | Plataforma | Tier |
+|---------|-----------|------|
+| **Frontend** | [Vercel](https://vercel.com) | Free |
+| **Backend** | [Render](https://render.com) | Free |
+| **PostgreSQL** | [Supabase](https://supabase.com) | Free (500MB) |
+| **Redis** | [Upstash](https://upstash.com) | Free (10K cmd/dia) |
 
 ## 🤝 Contribuindo
 

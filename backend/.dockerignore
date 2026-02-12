@@ -1,0 +1,33 @@
+# Ignore node_modules
+node_modules
+npm-debug.log
+
+# Ignore source files (we copy them explicitly)
+*.md
+.env
+.env.*
+!.env.example
+
+# Ignore test files
+**/*.test.ts
+**/*.spec.ts
+__tests__
+coverage
+
+# Ignore logs and temp
+logs
+*.log
+tmp
+
+# Ignore IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore dist (we build in container)
+dist
