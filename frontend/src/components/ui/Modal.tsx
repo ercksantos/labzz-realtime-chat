@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils/cn';
+import { useFocusTrap } from '@/hooks/useAccessibility';
 
 export interface ModalProps {
     isOpen: boolean;
@@ -22,16 +23,12 @@ export const Modal: React.FC<ModalProps> = ({
     closeOnOverlayClick = true,
     showCloseButton = true,
 }) => {
-    // Close on ESC key
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isOpen) {
-                onClose();
-            }
-        };
-        window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [isOpen, onClose]);
+    // Focus trap for accessibility
+    const modalRef = useFocusTrap<HTMLDivElement>({
+        isActive: isOpen,
+        onEscape: onClose,
+        returnFocusOnDeactivate: true,
+    });
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -71,6 +68,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Modal Content */}
             <div
+                ref={modalRef}
                 className={cn(
                     'relative w-full bg-white dark:bg-dark-card rounded-lg shadow-xl',
                     'transform transition-all duration-300',
