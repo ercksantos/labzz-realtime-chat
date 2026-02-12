@@ -79,6 +79,11 @@ export class ChatService {
             },
         });
 
+        // Invalidar cache de conversas de todos os participantes
+        for (const pId of participantIds) {
+            await cacheService.deleteUserConversations(pId);
+        }
+
         return conversation;
     }
 

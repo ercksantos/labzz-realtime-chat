@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { env } from '@/config/env';
@@ -33,43 +33,53 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const { isAuthenticated, user } = useAuth();
+    const socketRef = useRef<Socket | null>(null);
 
     // Conectar ao socket quando usuário estiver autenticado
     useEffect(() => {
-        if (isAuthenticated && user && !socket) {
+        if (isAuthenticated && user) {
+            // Já tem socket ativo — não recria
+            if (socketRef.current) {
+                return;
+            }
+
             console.log('SocketContext: Iniciando conexão...');
 
             const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
             if (!token) {
-                console.warn('SocketContext: Token não encontrado');
+                console.warn('SocketContext: Token não encontrado no localStorage');
                 return;
             }
+
+            console.log('SocketContext: Token encontrado, conectando a', env.wsUrl);
 
             // Criar conexão com autenticação
             const newSocket = io(env.wsUrl, {
                 auth: {
                     token,
                 },
-                transports: ['websocket'],
+                transports: ['websocket', 'polling'],
                 reconnection: true,
-                reconnectionAttempts: 5,
+                reconnectionAttempts: 10,
                 reconnectionDelay: 1000,
             });
 
+            socketRef.current = newSocket;
+
             // Event listeners
             newSocket.on('connect', () => {
-                console.log('SocketContext: Conectado', newSocket.id);
+                console.log('SocketContext: Conectado!', newSocket.id);
                 setIsConnected(true);
             });
 
             newSocket.on('disconnect', (reason) => {
-                console.log('SocketContext: Desconectado', reason);
+                console.log('SocketContext: Desconectado -', reason);
                 setIsConnected(false);
             });
 
             newSocket.on('connect_error', (error) => {
-                console.error('SocketContext: Erro de conexão', error);
+                console.error('SocketContext: Erro de conexão -', error.message);
                 setIsConnected(false);
             });
 
@@ -78,73 +88,80 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
             });
 
             setSocket(newSocket);
-
-            // Cleanup ao desmontar
-            return () => {
-                console.log('SocketContext: Limpando conexão');
-                newSocket.close();
-            };
         }
-    }, [isAuthenticated, user, socket]);
+
+        // Cleanup apenas quando o componente desmonta de verdade
+        return () => {
+            if (socketRef.current) {
+                console.log('SocketContext: Cleanup - fechando conexão');
+                socketRef.current.removeAllListeners();
+                socketRef.current.close();
+                socketRef.current = null;
+                setSocket(null);
+                setIsConnected(false);
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAuthenticated, user]);
 
     // Desconectar quando usuário fizer logout
     useEffect(() => {
-        if (!isAuthenticated && socket) {
+        if (!isAuthenticated && socketRef.current) {
             console.log('SocketContext: Usuário deslogou, desconectando socket');
-            socket.close();
+            socketRef.current.removeAllListeners();
+            socketRef.current.close();
+            socketRef.current = null;
             setSocket(null);
             setIsConnected(false);
         }
-    }, [isAuthenticated, socket]);
+    }, [isAuthenticated]);
 
     const connect = useCallback(() => {
-        if (socket && !socket.connected) {
+        if (socketRef.current && !socketRef.current.connected) {
             console.log('SocketContext: Reconectando manualmente...');
-            socket.connect();
+            socketRef.current.connect();
         }
-    }, [socket]);
+    }, []);
 
     const disconnect = useCallback(() => {
-        if (socket) {
+        if (socketRef.current) {
             console.log('SocketContext: Desconectando manualmente...');
-            socket.disconnect();
+            socketRef.current.disconnect();
         }
-    }, [socket]);
+    }, []);
 
     const emit = useCallback(
         (event: string, data?: any) => {
-            if (socket && isConnected) {
+            if (socketRef.current?.connected) {
                 console.log(`SocketContext: Emitindo evento "${event}"`, data);
-                socket.emit(event, data);
+                socketRef.current.emit(event, data);
             } else {
                 console.warn(`SocketContext: Não é possível emitir "${event}" - socket não conectado`);
             }
         },
-        [socket, isConnected]
+        []
     );
 
     const on = useCallback(
         (event: string, handler: (data: any) => void) => {
-            if (socket) {
-                console.log(`SocketContext: Registrando listener para "${event}"`);
-                socket.on(event, handler);
+            if (socketRef.current) {
+                socketRef.current.on(event, handler);
             }
         },
-        [socket]
+        []
     );
 
     const off = useCallback(
         (event: string, handler?: (data: any) => void) => {
-            if (socket) {
-                console.log(`SocketContext: Removendo listener para "${event}"`);
+            if (socketRef.current) {
                 if (handler) {
-                    socket.off(event, handler);
+                    socketRef.current.off(event, handler);
                 } else {
-                    socket.off(event);
+                    socketRef.current.off(event);
                 }
             }
         },
-        [socket]
+        []
     );
 
     return (

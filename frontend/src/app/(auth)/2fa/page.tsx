@@ -19,7 +19,6 @@ function TwoFactorForm() {
         if (!userId) {
             router.push('/login');
         } else {
-            // Focus first input on mount
             inputRefs.current[0]?.focus();
         }
     }, [userId, router]);

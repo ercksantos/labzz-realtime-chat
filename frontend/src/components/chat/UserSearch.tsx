@@ -7,9 +7,10 @@ import { Input, Loading, Avatar, Button } from '../ui';
 
 interface UserSearchProps {
     onClose: () => void;
+    onConversationCreated?: (conversation: any) => void;
 }
 
-export function UserSearch({ onClose }: UserSearchProps) {
+export function UserSearch({ onClose, onConversationCreated }: UserSearchProps) {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<
@@ -94,9 +95,12 @@ export function UserSearch({ onClose }: UserSearchProps) {
             const conversation = await chatService.createConversation(selectedUsers);
             console.log('UserSearch: Conversa criada', conversation);
 
-            // Navegar para a nova conversa
-            router.push(`/chat?conversation=${conversation.id}`);
-            onClose();
+            if (onConversationCreated) {
+                onConversationCreated(conversation);
+            } else {
+                router.push(`/chat?conversation=${conversation.id}`);
+                onClose();
+            }
         } catch (err: any) {
             console.error('UserSearch: Erro ao criar conversa', err);
             setError(err.response?.data?.message || 'Erro ao criar conversa');

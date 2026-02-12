@@ -59,8 +59,7 @@ function LoginForm() {
     };
 
     const handleOAuthLogin = (provider: 'google' | 'github') => {
-        const baseUrl = env.apiUrl.replace('/api', '');
-        window.location.href = `${baseUrl}/oauth/${provider}`;
+        window.location.href = `${env.apiUrl}/oauth/${provider}`;
     };
 
     return (

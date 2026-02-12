@@ -16,16 +16,22 @@ export const authService = {
     },
 
     async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        const response = await apiClient.post<{ status: string; data: AuthResponse }>(
+        const response = await apiClient.post<{ status: string; data: any }>(
             '/auth/login',
             credentials
         );
         const authData = response.data.data;
 
-        // Salvar tokens
-        apiClient.setTokens(authData.tokens.accessToken, authData.tokens.refreshToken);
+        // Backend retorna tokens no nível raiz ou dentro de 'tokens'
+        const accessToken = authData.tokens?.accessToken || authData.accessToken;
+        const refreshToken = authData.tokens?.refreshToken || authData.refreshToken;
 
-        return authData;
+        apiClient.setTokens(accessToken, refreshToken);
+
+        return {
+            user: authData.user,
+            tokens: { accessToken, refreshToken },
+        };
     },
 
     async logout(): Promise<void> {
@@ -51,16 +57,21 @@ export const authService = {
     },
 
     async verify2FA(userId: string, token: string): Promise<AuthResponse> {
-        const response = await apiClient.post<{ status: string; data: AuthResponse }>(
+        const response = await apiClient.post<{ status: string; data: any }>(
             '/auth/verify-2fa',
             { userId, token }
         );
         const authData = response.data.data;
 
-        // Salvar tokens
-        apiClient.setTokens(authData.tokens.accessToken, authData.tokens.refreshToken);
+        const accessToken = authData.tokens?.accessToken || authData.accessToken;
+        const refreshToken = authData.tokens?.refreshToken || authData.refreshToken;
 
-        return authData;
+        apiClient.setTokens(accessToken, refreshToken);
+
+        return {
+            user: authData.user,
+            tokens: { accessToken, refreshToken },
+        };
     },
 
     async getCsrfToken(): Promise<{ csrfToken: string }> {

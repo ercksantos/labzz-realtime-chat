@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { chatService, type Message, type PaginatedMessages } from '@/services/chat.service';
+import { chatService, type Message } from '@/services/chat.service';
 
 interface UseMessagesOptions {
     conversationId: string | undefined;
@@ -28,10 +28,11 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         setError(null);
 
         try {
-            const data: PaginatedMessages = await chatService.getMessages(conversationId, 1, limit);
+            const data = await chatService.getMessages(conversationId, 1, limit);
             setMessages(data.messages);
             setTotal(data.pagination.total);
-            setHasMore(data.pagination.hasMore);
+            const more = data.pagination.hasMore ?? (data.pagination.page < (data.pagination.totalPages || 1));
+            setHasMore(more);
             setCurrentPage(1);
         } catch (err: any) {
             console.error('useMessages: Erro ao carregar mensagens', err);
@@ -52,12 +53,12 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
 
         try {
             const nextPage = currentPage + 1;
-            const data: PaginatedMessages = await chatService.getMessages(conversationId, nextPage, limit);
+            const data = await chatService.getMessages(conversationId, nextPage, limit);
 
-            // Mensagens mais antigas no início
             setMessages((prev) => [...data.messages, ...prev]);
             setTotal(data.pagination.total);
-            setHasMore(data.pagination.hasMore);
+            const more = data.pagination.hasMore ?? (nextPage < (data.pagination.totalPages || 1));
+            setHasMore(more);
             setCurrentPage(nextPage);
         } catch (err: any) {
             console.error('useMessages: Erro ao carregar mais mensagens', err);

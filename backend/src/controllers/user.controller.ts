@@ -86,6 +86,27 @@ export class UserController {
             next(error);
         }
     }
+
+    async changePassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            // @ts-expect-error - userId is set by auth middleware
+            const userId = req.userId;
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                throw new AppError('Current password and new password are required', 400);
+            }
+
+            const result = await userService.changePassword(userId, currentPassword, newPassword);
+
+            res.status(200).json({
+                status: 'success',
+                data: result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const userController = new UserController();

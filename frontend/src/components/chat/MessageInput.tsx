@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, KeyboardEvent, useRef } from 'react';
+import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils/cn';
 
 interface MessageInputProps {
@@ -19,6 +19,15 @@ export function MessageInput({
     const [message, setMessage] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleSend = () => {
         const trimmedMessage = message.trim();

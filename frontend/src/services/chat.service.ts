@@ -17,6 +17,8 @@ export interface Message {
 
 export interface Conversation {
     id: string;
+    isGroup: boolean;
+    name?: string;
     participants: Array<{
         id: string;
         username: string;
@@ -35,13 +37,61 @@ export interface Conversation {
     updatedAt: string;
 }
 
+// Formato recebido do backend (participants aninhados)
+interface BackendConversation {
+    id: string;
+    isGroup: boolean;
+    name?: string;
+    participants: Array<{
+        userId: string;
+        user: {
+            id: string;
+            username: string;
+            name: string;
+            avatar: string | null;
+            isOnline: boolean;
+        };
+    }>;
+    messages?: Array<{
+        id: string;
+        content: string;
+        senderId: string;
+        createdAt: string;
+        sender: { id: string; username: string; name: string };
+    }>;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// Normalizar resposta do backend
+function normalizeConversation(raw: BackendConversation): Conversation {
+    return {
+        id: raw.id,
+        isGroup: raw.isGroup,
+        name: raw.name,
+        participants: raw.participants.map((p) => p.user),
+        lastMessage: raw.messages?.[0]
+            ? {
+                id: raw.messages[0].id,
+                content: raw.messages[0].content,
+                senderId: raw.messages[0].senderId,
+                createdAt: raw.messages[0].createdAt,
+            }
+            : undefined,
+        unreadCount: 0,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+    };
+}
+
 export interface PaginatedMessages {
     messages: Message[];
     pagination: {
         page: number;
         limit: number;
         total: number;
-        hasMore: boolean;
+        totalPages?: number;
+        hasMore?: boolean;
     };
 }
 
@@ -61,18 +111,18 @@ export interface SearchUsersParams {
 export const chatService = {
     // Buscar conversas do usuário
     async getConversations() {
-        const response = await apiClient.get<{ status: string; data: { conversations: Conversation[] } }>(
+        const response = await apiClient.get<{ status: string; data: { conversations: BackendConversation[] } }>(
             '/chat/conversations'
         );
-        return response.data.data.conversations;
+        return response.data.data.conversations.map(normalizeConversation);
     },
 
     // Buscar conversa por ID
     async getConversation(conversationId: string) {
-        const response = await apiClient.get<{ status: string; data: { conversation: Conversation } }>(
+        const response = await apiClient.get<{ status: string; data: { conversation: BackendConversation } }>(
             `/chat/conversations/${conversationId}`
         );
-        return response.data.data.conversation;
+        return normalizeConversation(response.data.data.conversation);
     },
 
     // Buscar mensagens com paginação
@@ -106,13 +156,13 @@ export const chatService = {
     // Buscar mensagens
     async searchMessages(params: SearchMessagesParams) {
         const response = await apiClient.get<{ status: string; data: { messages: Message[]; total: number } }>(
-            '/chat/search/messages',
+            '/search/messages',
             { params }
         );
         return response.data.data;
     },
 
-    // Buscar usuários
+    // Buscar usuários (via PostgreSQL - /users endpoint)
     async searchUsers(params: SearchUsersParams) {
         const response = await apiClient.get<{
             status: string;
@@ -124,19 +174,27 @@ export const chatService = {
                     avatar: string | null;
                     isOnline: boolean;
                 }>;
-                total: number;
+                pagination: {
+                    total: number;
+                    page: number;
+                    limit: number;
+                    totalPages: number;
+                };
             };
-        }>('/chat/search/users', { params });
-        return response.data.data;
+        }>('/users', { params: { search: params.query, page: params.page, limit: params.limit } });
+        return {
+            users: response.data.data.users,
+            total: response.data.data.pagination.total,
+        };
     },
 
     // Criar nova conversa
     async createConversation(participantIds: string[]) {
-        const response = await apiClient.post<{ status: string; data: { conversation: Conversation } }>(
+        const response = await apiClient.post<{ status: string; data: { conversation: BackendConversation } }>(
             '/chat/conversations',
             { participantIds }
         );
-        return response.data.data.conversation;
+        return normalizeConversation(response.data.data.conversation);
     },
 
     // Excluir conversa

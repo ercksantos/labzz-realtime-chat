@@ -1,6 +1,8 @@
 import prisma from '../config/database';
+import bcrypt from 'bcrypt';
 import { AppError } from '../middlewares/errorHandler';
 import { UpdateUserInput } from '../validators/user.validator';
+import { config } from '../config';
 import elasticsearchService from './elasticsearch.service';
 import logger from '../utils/logger';
 
@@ -141,6 +143,30 @@ export class UserService {
         });
 
         return { message: 'User deleted successfully' };
+    }
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user || !user.password) {
+            throw new AppError('User not found', 404);
+        }
+
+        const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentValid) {
+            throw new AppError('Current password is incorrect', 400);
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, config.security.bcryptRounds);
+        await prisma.user.update({
+            where: { id: userId },
+            data: { password: hashedPassword },
+        });
+
+        logger.info(`Password changed for user: ${userId}`);
+        return { message: 'Password changed successfully' };
     }
 }
 

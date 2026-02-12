@@ -58,23 +58,27 @@ export const userService = {
     },
 
     async get2FAStatus(): Promise<TwoFactorStatusResponse> {
-        const response = await apiClient.get<{ status: string; data: TwoFactorStatusResponse }>(
-            '/2fa/status'
+        // Backend não tem endpoint separado de status. Buscar do perfil
+        const response = await apiClient.get<{ status: string; data: { user: User } }>(
+            '/users/me'
         );
-        return response.data.data;
+        const user = response.data.data.user;
+        return {
+            enabled: !!(user as any).twoFactorEnabled,
+        };
     },
 
     async setup2FA(): Promise<TwoFactorSetupResponse> {
-        const response = await apiClient.post<{ status: string; data: TwoFactorSetupResponse }>(
-            '/2fa/setup'
+        const response = await apiClient.get<{ status: string; data: TwoFactorSetupResponse }>(
+            '/2fa/generate'
         );
         return response.data.data;
     },
 
-    async enable2FA(token: string): Promise<{ backupCodes: string[] }> {
+    async enable2FA(secret: string, token: string): Promise<{ backupCodes: string[] }> {
         const response = await apiClient.post<{ status: string; data: { backupCodes: string[] } }>(
             '/2fa/enable',
-            { token }
+            { secret, token }
         );
         return response.data.data;
     },

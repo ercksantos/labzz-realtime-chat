@@ -103,11 +103,11 @@ export function ChatArea({
         if (!conversationId || !isConnected) return;
 
         console.log('ChatArea: Entrando na conversa', conversationId);
-        emit('conversation:join', { conversationId });
+        emit('join_conversation', { conversationId });
 
         return () => {
             console.log('ChatArea: Saindo da conversa', conversationId);
-            emit('conversation:leave', { conversationId });
+            emit('leave_conversation', { conversationId });
         };
     }, [conversationId, isConnected, emit]);
 
@@ -170,15 +170,15 @@ export function ChatArea({
         };
 
         // Registrar listeners do socket
-        on('message:new', handleNewMessage);
-        on('typing:start', handleTypingStart);
-        on('typing:stop', handleTypingStop);
+        on('new_message', handleNewMessage);
+        on('user_typing', handleTypingStart);
+        on('user_stopped_typing', handleTypingStop);
 
         return () => {
             // Limpar listeners
-            off('message:new', handleNewMessage);
-            off('typing:start', handleTypingStart);
-            off('typing:stop', handleTypingStop);
+            off('new_message', handleNewMessage);
+            off('user_typing', handleTypingStart);
+            off('user_stopped_typing', handleTypingStop);
 
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
@@ -224,7 +224,7 @@ export function ChatArea({
         if (isConnected && socket) {
             console.log('ChatArea: Enviando mensagem via socket', { conversationId, content });
 
-            emit('message:send', {
+            emit('send_message', {
                 conversationId,
                 content,
                 tempId, // Para identificar a mensagem temporária
@@ -241,7 +241,7 @@ export function ChatArea({
         if (!conversationId || !isConnected) return;
 
         console.log('ChatArea: Emitindo evento de digitação');
-        emit('typing:start', { conversationId });
+        emit('typing_start', { conversationId });
 
         // Parar digitação após 2s de inatividade
         if (typingTimeoutRef.current) {
@@ -249,7 +249,7 @@ export function ChatArea({
         }
 
         typingTimeoutRef.current = setTimeout(() => {
-            emit('typing:stop', { conversationId });
+            emit('typing_stop', { conversationId });
         }, 2000);
     }, [conversationId, isConnected, emit]);
 

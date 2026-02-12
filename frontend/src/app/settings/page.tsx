@@ -188,7 +188,7 @@ function TwoFactorAuth() {
         setError('');
 
         try {
-            const { backupCodes: codes } = await userService.enable2FA(verificationCode);
+            const { backupCodes: codes } = await userService.enable2FA(setupData!.secret, verificationCode);
             setBackupCodes(codes);
             setShowBackupCodes(true);
             setShowSetupModal(false);

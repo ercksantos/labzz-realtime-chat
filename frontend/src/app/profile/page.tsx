@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/user.service';
 import { Avatar, Button, Input, Loading, Modal } from '@/components/ui';
@@ -187,6 +187,17 @@ export default function ProfilePage() {
         username: user?.username || '',
         email: user?.email || '',
     });
+
+    // Sincronizar formData quando user carrega
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                name: user.name || '',
+                username: user.username || '',
+                email: user.email || '',
+            });
+        }
+    }, [user]);
 
     // Handler de atualização do avatar
     const handleAvatarChange = useCallback((url: string | null) => {

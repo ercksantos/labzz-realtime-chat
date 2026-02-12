@@ -1,8 +1,15 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { userController } from '../controllers/user.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
+
+// Middleware para resolver '/me' para o ID do usuário autenticado
+const resolveMe = (req: Request, _res: Response, next: NextFunction) => {
+    // @ts-expect-error - userId is set by auth middleware
+    req.params.id = req.userId;
+    next();
+};
 
 /**
  * @swagger
@@ -61,6 +68,12 @@ const router = Router();
  *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.get('/', authMiddleware, userController.listUsers.bind(userController));
+
+// Rotas /me - devem vir antes de /:id para evitar conflito
+router.get('/me', authMiddleware, resolveMe, userController.getUserById.bind(userController));
+router.put('/me', authMiddleware, resolveMe, userController.updateUser.bind(userController));
+router.put('/me/password', authMiddleware, userController.changePassword.bind(userController));
+router.delete('/me', authMiddleware, resolveMe, userController.deleteUser.bind(userController));
 
 /**
  * @swagger
