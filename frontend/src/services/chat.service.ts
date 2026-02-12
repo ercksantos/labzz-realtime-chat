@@ -59,7 +59,7 @@ export interface SearchUsersParams {
 }
 
 export const chatService = {
-    // Get all conversations for current user
+    // Buscar conversas do usuário
     async getConversations() {
         const response = await apiClient.get<{ status: string; data: { conversations: Conversation[] } }>(
             '/chat/conversations'
@@ -67,7 +67,7 @@ export const chatService = {
         return response.data.data.conversations;
     },
 
-    // Get conversation by ID
+    // Buscar conversa por ID
     async getConversation(conversationId: string) {
         const response = await apiClient.get<{ status: string; data: { conversation: Conversation } }>(
             `/chat/conversations/${conversationId}`
@@ -75,7 +75,7 @@ export const chatService = {
         return response.data.data.conversation;
     },
 
-    // Get messages for a conversation with pagination
+    // Buscar mensagens com paginação
     async getMessages(conversationId: string, page: number = 1, limit: number = 50): Promise<PaginatedMessages> {
         const response = await apiClient.get<{ status: string; data: PaginatedMessages }>(
             `/chat/conversations/${conversationId}/messages`,
@@ -86,7 +86,7 @@ export const chatService = {
         return response.data.data;
     },
 
-    // Send a new message
+    // Enviar mensagem
     async sendMessage(conversationId: string, content: string) {
         const response = await apiClient.post<{ status: string; data: { message: Message } }>(
             `/chat/conversations/${conversationId}/messages`,
@@ -95,7 +95,7 @@ export const chatService = {
         return response.data.data.message;
     },
 
-    // Mark messages as read
+    // Marcar como lidas
     async markAsRead(conversationId: string) {
         const response = await apiClient.post<{ status: string }>(
             `/chat/conversations/${conversationId}/read`
@@ -103,7 +103,7 @@ export const chatService = {
         return response.data;
     },
 
-    // Search messages
+    // Buscar mensagens
     async searchMessages(params: SearchMessagesParams) {
         const response = await apiClient.get<{ status: string; data: { messages: Message[]; total: number } }>(
             '/chat/search/messages',
@@ -112,7 +112,7 @@ export const chatService = {
         return response.data.data;
     },
 
-    // Search users
+    // Buscar usuários
     async searchUsers(params: SearchUsersParams) {
         const response = await apiClient.get<{
             status: string;
@@ -130,7 +130,7 @@ export const chatService = {
         return response.data.data;
     },
 
-    // Create a new conversation
+    // Criar nova conversa
     async createConversation(participantIds: string[]) {
         const response = await apiClient.post<{ status: string; data: { conversation: Conversation } }>(
             '/chat/conversations',
@@ -139,7 +139,7 @@ export const chatService = {
         return response.data.data.conversation;
     },
 
-    // Delete a conversation
+    // Excluir conversa
     async deleteConversation(conversationId: string) {
         const response = await apiClient.delete<{ status: string }>(
             `/chat/conversations/${conversationId}`

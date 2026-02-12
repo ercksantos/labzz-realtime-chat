@@ -1,4 +1,3 @@
-// Lazy Loading Components
 export {
     createLazyComponent,
     createClientOnlyComponent,
@@ -15,7 +14,6 @@ export {
     usePreload,
 } from './LazyComponents';
 
-// Optimized Image Components
 export {
     OptimizedImage,
     AvatarImage,

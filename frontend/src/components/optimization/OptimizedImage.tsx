@@ -4,20 +4,12 @@ import Image, { ImageProps } from 'next/image';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils/cn';
 
-// ============================================
-// Types
-// ============================================
-
 interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
     fallbackSrc?: string;
     showSkeleton?: boolean;
     aspectRatio?: '1:1' | '16:9' | '4:3' | '3:2' | 'auto';
     objectFit?: 'cover' | 'contain' | 'fill' | 'none';
 }
-
-// ============================================
-// Aspect Ratio Classes
-// ============================================
 
 const aspectRatioClasses = {
     '1:1': 'aspect-square',
@@ -26,10 +18,6 @@ const aspectRatioClasses = {
     '3:2': 'aspect-[3/2]',
     auto: '',
 };
-
-// ============================================
-// OptimizedImage Component
-// ============================================
 
 export function OptimizedImage({
     src,
@@ -61,12 +49,12 @@ export function OptimizedImage({
             role="img"
             aria-label={alt}
         >
-            {/* Skeleton loader */}
+            {/* Skeleton de carregamento */}
             {showSkeleton && isLoading && (
                 <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-700" />
             )}
 
-            {/* Image */}
+            {/* Imagem */}
             <Image
                 src={imageSrc}
                 alt={alt}
@@ -86,9 +74,7 @@ export function OptimizedImage({
     );
 }
 
-// ============================================
-// Avatar Image Component
-// ============================================
+// Componente de avatar otimizado
 
 interface AvatarImageProps {
     src?: string | null;
@@ -162,9 +148,7 @@ export function AvatarImage({
     );
 }
 
-// ============================================
-// Background Image Component
-// ============================================
+// Componente de imagem de fundo
 
 interface BackgroundImageProps {
     src: string;
@@ -205,9 +189,7 @@ export function BackgroundImage({
     );
 }
 
-// ============================================
-// Blur Placeholder Generator
-// ============================================
+// Gera placeholder com efeito shimmer
 
 export function generateBlurPlaceholder(width: number, height: number): string {
     const shimmer = `

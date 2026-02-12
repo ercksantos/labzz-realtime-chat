@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
 
-// Define locales locally to avoid importing from server-only file
+// Definir locales localmente para evitar importar de arquivo server-only
 const locales = ['pt-BR', 'en-US'] as const;
 type Locale = (typeof locales)[number];
 
@@ -30,14 +30,14 @@ export function LanguageSelector({ className, variant = 'dropdown' }: LanguageSe
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const handleChangeLocale = async (newLocale: Locale) => {
-        // Set locale cookie
+        // Definir cookie de locale
         document.cookie = `locale=${newLocale};path=/;max-age=31536000`; // 1 year
 
-        // Reload the page to apply the new locale
+        // Recarregar página para aplicar novo locale
         window.location.reload();
     };
 
-    // Close dropdown when clicking outside
+    // Fechar dropdown ao clicar fora
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {

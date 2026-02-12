@@ -67,11 +67,11 @@ export function ToastProvider({
 
             setToasts((prev) => {
                 const newToasts = [...prev, { ...toast, id }];
-                // Limit the number of toasts
+                // Limitar quantidade de toasts
                 return newToasts.slice(-maxToasts);
             });
 
-            // Auto-remove after duration
+            // Remover automaticamente após duração
             if (duration > 0) {
                 setTimeout(() => {
                     removeToast(id);

@@ -4,13 +4,7 @@ import dynamic from 'next/dynamic';
 import { ComponentType, ReactNode, Suspense } from 'react';
 import { Skeleton } from '@/components/ui';
 
-// ============================================
-// Lazy Loading Utilities
-// ============================================
-
-/**
- * Creates a lazy-loaded component with a loading fallback
- */
+// Cria componente com carregamento lazy e fallback
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLazyComponent<T = any>(
     importFn: () => Promise<{ default: ComponentType<T> }>,
@@ -22,9 +16,7 @@ export function createLazyComponent<T = any>(
     });
 }
 
-/**
- * Creates a lazy-loaded component without SSR (for browser-only components)
- */
+// Componente lazy sem SSR (apenas navegador)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createClientOnlyComponent<T = any>(
     importFn: () => Promise<{ default: ComponentType<T> }>,
@@ -36,9 +28,7 @@ export function createClientOnlyComponent<T = any>(
     });
 }
 
-// ============================================
-// Default Loaders
-// ============================================
+// Loaders padrão
 
 function DefaultLoader() {
     return (
@@ -66,9 +56,7 @@ export function AvatarLoader() {
     return <Skeleton variant="circular" className="h-10 w-10" />;
 }
 
-// ============================================
-// Suspense Wrapper
-// ============================================
+// Wrapper com Suspense
 
 interface LazyWrapperProps {
     children: ReactNode;
@@ -79,11 +67,8 @@ export function LazyWrapper({ children, fallback }: LazyWrapperProps) {
     return <Suspense fallback={fallback || <DefaultLoader />}>{children}</Suspense>;
 }
 
-// ============================================
-// Preloaded Lazy Components
-// ============================================
+// Componentes lazy pré-configurados
 
-// Chat components (heavy, load on demand)
 export const LazyChatArea = dynamic(
     () => import('@/components/chat/ChatArea').then((mod) => mod.ChatArea),
     {
@@ -93,14 +78,12 @@ export const LazyChatArea = dynamic(
 );
 
 export const LazySidebar = dynamic(
-    () => import('@/components/chat/Sidebar').then((mod) => mod.Sidebar),
     {
         loading: () => <ListLoader />,
         ssr: true,
     }
 );
 
-// Modal components (not needed immediately)
 export const LazyModal = dynamic(
     () => import('@/components/ui/Modal').then((mod) => mod.Modal),
     {
@@ -109,7 +92,6 @@ export const LazyModal = dynamic(
     }
 );
 
-// Heavy UI components
 export const LazyUserSearch = dynamic(
     () => import('@/components/chat/UserSearch').then((mod) => mod.UserSearch),
     {
@@ -118,7 +100,6 @@ export const LazyUserSearch = dynamic(
     }
 );
 
-// Animation components (browser-only for reduced motion support)
 export const LazyFadeIn = dynamic(
     () => import('@/components/animations/MotionComponents').then((mod) => mod.FadeIn),
     {
@@ -127,15 +108,9 @@ export const LazyFadeIn = dynamic(
     }
 );
 
-// ============================================
-// Preload utilities
-// ============================================
+// Preload de componentes para carregamento mais rápido
 
-/**
- * Preloads a component module for faster subsequent loads
- */
 export function preloadComponent(importFn: () => Promise<unknown>) {
-    // Only preload in browser and when network is good
     if (typeof window !== 'undefined') {
         const connection = (navigator as Navigator & { connection?: { effectiveType: string } })
             .connection;
@@ -145,9 +120,6 @@ export function preloadComponent(importFn: () => Promise<unknown>) {
     }
 }
 
-/**
- * Hook to preload components on hover/focus
- */
 export function usePreload(importFn: () => Promise<unknown>) {
     const preload = () => preloadComponent(importFn);
 

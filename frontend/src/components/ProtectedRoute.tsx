@@ -9,11 +9,7 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
-/**
- * HOC Component to protect routes that require authentication
- * Redirects to /login if user is not authenticated
- * Shows loading spinner while checking authentication status
- */
+// Protege rotas que requerem autenticação
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
@@ -21,13 +17,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            // Save intended destination to redirect after login
             const returnUrl = encodeURIComponent(pathname);
             router.push(`/login?returnUrl=${returnUrl}`);
         }
     }, [isAuthenticated, isLoading, router, pathname]);
 
-    // Show loading while checking authentication
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-bg">
@@ -39,7 +33,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    // Don't render protected content if not authenticated
     if (!isAuthenticated) {
         return null;
     }

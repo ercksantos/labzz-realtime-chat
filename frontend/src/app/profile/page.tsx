@@ -181,14 +181,14 @@ export default function ProfilePage() {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Form state
+    // Estado do formulário
     const [formData, setFormData] = useState({
         name: user?.name || '',
         username: user?.username || '',
         email: user?.email || '',
     });
 
-    // Update avatar handler
+    // Handler de atualização do avatar
     const handleAvatarChange = useCallback((url: string | null) => {
         // Em uma implementação real, atualizaria o contexto de auth
         setSuccessMessage('Foto de perfil atualizada com sucesso!');

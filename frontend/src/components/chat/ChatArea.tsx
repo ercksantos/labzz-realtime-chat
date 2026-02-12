@@ -39,10 +39,10 @@ export function ChatArea({
     const { socket, isConnected, emit, on, off } = useSocket();
     const { user } = useAuth();
 
-    // Enable notifications
+    // Ativar notificações
     useNotifications();
 
-    // Use the messages hook for pagination
+    // Hook de mensagens com paginação
     const {
         messages: apiMessages,
         isLoading,
@@ -53,7 +53,7 @@ export function ChatArea({
         replaceTemporaryMessage,
     } = useMessages({ conversationId });
 
-    // Convert API messages to MessageProps format
+    // Converter mensagens da API para formato do componente
     const messages: MessageProps[] = apiMessages.map((msg: APIMessage) => ({
         id: msg.id,
         content: msg.content,
@@ -66,7 +66,7 @@ export function ChatArea({
         status: 'read' as const,
     }));
 
-    // Auto-scroll to bottom on new messages
+    // Auto-scroll ao receber novas mensagens
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
         messagesEndRef.current?.scrollIntoView({ behavior });
     };
@@ -77,7 +77,7 @@ export function ChatArea({
         }
     }, [messages, shouldAutoScroll]);
 
-    // Intersection Observer for infinite scroll (load more on scroll to top)
+    // Observer para scroll infinito (carregar mais ao rolar para cima)
     useEffect(() => {
         if (!loadMoreTriggerRef.current || !hasMore || isLoadingMore) return;
 
@@ -98,7 +98,7 @@ export function ChatArea({
         };
     }, [hasMore, isLoadingMore, loadMore]);
 
-    // Socket: Join/leave conversation
+    // Socket: entrar/sair da conversa
     useEffect(() => {
         if (!conversationId || !isConnected) return;
 
@@ -111,7 +111,7 @@ export function ChatArea({
         };
     }, [conversationId, isConnected, emit]);
 
-    // Socket: Listen for incoming messages
+    // Socket: escutar mensagens recebidas
     useEffect(() => {
         if (!isConnected) return;
 
@@ -133,10 +133,10 @@ export function ChatArea({
                 },
             };
 
-            // Add to messages list
+            // Adicionar à lista de mensagens
             addApiMessage(apiMessage);
 
-            // If it's our message and had a temporary ID, replace it
+            // Se for nossa mensagem com ID temporário, substituir
             if (data.tempId && data.senderId === user?.id) {
                 replaceTemporaryMessage(data.tempId, apiMessage);
             }
@@ -147,12 +147,12 @@ export function ChatArea({
             if (data.userId !== user?.id) {
                 setIsTyping(true);
 
-                // Clear existing timeout
+                // Limpar timeout existente
                 if (typingTimeoutRef.current) {
                     clearTimeout(typingTimeoutRef.current);
                 }
 
-                // Set new timeout to hide typing indicator
+                // Novo timeout para ocultar indicador de digitação
                 typingTimeoutRef.current = setTimeout(() => {
                     setIsTyping(false);
                 }, 3000);
@@ -169,13 +169,13 @@ export function ChatArea({
             }
         };
 
-        // Register socket listeners
+        // Registrar listeners do socket
         on('message:new', handleNewMessage);
         on('typing:start', handleTypingStart);
         on('typing:stop', handleTypingStop);
 
         return () => {
-            // Cleanup listeners
+            // Limpar listeners
             off('message:new', handleNewMessage);
             off('typing:start', handleTypingStart);
             off('typing:stop', handleTypingStop);
@@ -186,7 +186,7 @@ export function ChatArea({
         };
     }, [isConnected, user, on, off, addApiMessage, replaceTemporaryMessage, conversationId]);
 
-    // Check if user is near bottom to enable/disable auto-scroll
+    // Verificar se usuário está no final para auto-scroll
     const handleScroll = () => {
         if (!messagesContainerRef.current) return;
 
@@ -200,7 +200,7 @@ export function ChatArea({
 
         setIsSending(true);
 
-        // Create temporary message for optimistic update
+        // Mensagem temporária para atualização otimista
         const tempId = `temp-${Date.now()}`;
         const tempMessage: APIMessage = {
             id: tempId,
@@ -217,10 +217,10 @@ export function ChatArea({
             },
         };
 
-        // Add temporary message immediately
+        // Adicionar mensagem temporária imediatamente
         addApiMessage(tempMessage);
 
-        // Send via WebSocket if connected
+        // Enviar via WebSocket se conectado
         if (isConnected && socket) {
             console.log('ChatArea: Enviando mensagem via socket', { conversationId, content });
 
@@ -243,7 +243,7 @@ export function ChatArea({
         console.log('ChatArea: Emitindo evento de digitação');
         emit('typing:start', { conversationId });
 
-        // Stop typing after 2 seconds of inactivity
+        // Parar digitação após 2s de inatividade
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
         }
@@ -253,10 +253,10 @@ export function ChatArea({
         }, 2000);
     }, [conversationId, isConnected, emit]);
 
-    // Group messages by date
+    // Agrupar mensagens por data
     const groupedMessages = groupMessagesByDate(messages);
 
-    // Display connection status (for debugging)
+    // Status da conexão
     useEffect(() => {
         console.log('ChatArea: Socket conectado?', isConnected);
     }, [isConnected]);
@@ -453,7 +453,7 @@ export function ChatArea({
                     onClose={() => setShowMessageSearch(false)}
                     onSelectMessage={(message) => {
                         console.log('ChatArea: Mensagem selecionada na busca', message);
-                        // TODO: Scroll to selected message
+                        // TODO: Scroll para mensagem selecionada
                         setShowMessageSearch(false);
                     }}
                 />

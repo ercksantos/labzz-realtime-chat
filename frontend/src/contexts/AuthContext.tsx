@@ -102,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         async (userId: string, token: string) => {
             const authData = await authService.verify2FA(userId, token);
             setUser(authData.user);
-            // Don't navigate here - let the component handle navigation
+            // Não navegar aqui - o componente gerencia a navegação
         },
         []
     );

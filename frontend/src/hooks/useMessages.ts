@@ -19,7 +19,7 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
     const [total, setTotal] = useState(0);
     const isFetchingRef = useRef(false);
 
-    // Load initial messages
+    // Carregar mensagens iniciais
     const loadMessages = useCallback(async () => {
         if (!conversationId || isLoading || isFetchingRef.current) return;
 
@@ -42,7 +42,7 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         }
     }, [conversationId, limit, isLoading]);
 
-    // Load more messages (pagination)
+    // Carregar mais mensagens (paginação)
     const loadMore = useCallback(async () => {
         if (!conversationId || !hasMore || isLoadingMore || isFetchingRef.current) return;
 
@@ -54,7 +54,7 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
             const nextPage = currentPage + 1;
             const data: PaginatedMessages = await chatService.getMessages(conversationId, nextPage, limit);
 
-            // Prepend older messages
+            // Mensagens mais antigas no início
             setMessages((prev) => [...data.messages, ...prev]);
             setTotal(data.pagination.total);
             setHasMore(data.pagination.hasMore);
@@ -68,10 +68,9 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         }
     }, [conversationId, currentPage, hasMore, isLoadingMore, limit]);
 
-    // Add a new message to the list
+    // Adicionar nova mensagem
     const addMessage = useCallback((message: Message) => {
         setMessages((prev) => {
-            // Check for duplicates
             if (prev.some((msg) => msg.id === message.id)) {
                 return prev;
             }
@@ -80,27 +79,27 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         setTotal((prev) => prev + 1);
     }, []);
 
-    // Update a message
+    // Atualizar mensagem
     const updateMessage = useCallback((messageId: string, updates: Partial<Message>) => {
         setMessages((prev) =>
             prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg))
         );
     }, []);
 
-    // Remove a message
+    // Remover mensagem
     const removeMessage = useCallback((messageId: string) => {
         setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
         setTotal((prev) => Math.max(0, prev - 1));
     }, []);
 
-    // Replace temporary message with real one
+    // Substituir mensagem temporária pela real
     const replaceTemporaryMessage = useCallback((tempId: string, newMessage: Message) => {
         setMessages((prev) =>
             prev.map((msg) => (msg.id === tempId ? newMessage : msg))
         );
     }, []);
 
-    // Clear all messages
+    // Limpar mensagens
     const clearMessages = useCallback(() => {
         setMessages([]);
         setTotal(0);
@@ -109,7 +108,7 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         setError(null);
     }, [initialPage]);
 
-    // Load messages when conversation changes
+    // Recarregar ao trocar conversa
     useEffect(() => {
         if (conversationId) {
             clearMessages();

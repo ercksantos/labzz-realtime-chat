@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 
-// Mock next/navigation
 jest.mock('next/navigation', () => ({
     useRouter: () => ({
         push: jest.fn(),
@@ -14,28 +13,25 @@ jest.mock('next/navigation', () => ({
     useParams: () => ({}),
 }));
 
-// Mock next-intl
 jest.mock('next-intl', () => ({
     useTranslations: () => (key: string) => key,
     useLocale: () => 'pt-BR',
 }));
 
-// Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: jest.fn(), // deprecated
-        removeListener: jest.fn(), // deprecated
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
         dispatchEvent: jest.fn(),
     })),
 });
 
-// Mock IntersectionObserver
 class MockIntersectionObserver {
     observe = jest.fn();
     unobserve = jest.fn();
@@ -46,7 +42,6 @@ Object.defineProperty(window, 'IntersectionObserver', {
     value: MockIntersectionObserver,
 });
 
-// Mock ResizeObserver
 class MockResizeObserver {
     observe = jest.fn();
     unobserve = jest.fn();
@@ -57,10 +52,9 @@ Object.defineProperty(window, 'ResizeObserver', {
     value: MockResizeObserver,
 });
 
-// Mock scrollTo
 window.scrollTo = jest.fn();
 
-// Suppress console errors during tests (optional)
+// Suprime erros de console esperados durante testes
 const originalError = console.error;
 beforeAll(() => {
     console.error = (...args) => {

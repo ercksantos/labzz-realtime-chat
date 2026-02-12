@@ -1,6 +1,4 @@
-/**
- * Format timestamp to relative time (e.g., "há 5 minutos", "ontem")
- */
+// Formata data relativa (ex: "há 5 minutos", "ontem")
 export function formatRelativeTime(date: Date | string): string {
     const now = new Date();
     const messageDate = typeof date === 'string' ? new Date(date) : date;
@@ -37,9 +35,6 @@ export function formatRelativeTime(date: Date | string): string {
     });
 }
 
-/**
- * Format time to HH:MM
- */
 export function formatTime(date: Date | string): string {
     const messageDate = typeof date === 'string' ? new Date(date) : date;
     return messageDate.toLocaleTimeString('pt-BR', {
@@ -48,9 +43,6 @@ export function formatTime(date: Date | string): string {
     });
 }
 
-/**
- * Format full timestamp (date + time)
- */
 export function formatFullTimestamp(date: Date | string): string {
     const messageDate = typeof date === 'string' ? new Date(date) : date;
     return messageDate.toLocaleString('pt-BR', {
@@ -62,9 +54,6 @@ export function formatFullTimestamp(date: Date | string): string {
     });
 }
 
-/**
- * Check if date is today
- */
 export function isToday(date: Date | string): boolean {
     const messageDate = typeof date === 'string' ? new Date(date) : date;
     const today = new Date();
@@ -75,9 +64,6 @@ export function isToday(date: Date | string): boolean {
     );
 }
 
-/**
- * Check if date is yesterday
- */
 export function isYesterday(date: Date | string): boolean {
     const messageDate = typeof date === 'string' ? new Date(date) : date;
     const yesterday = new Date();
@@ -89,9 +75,7 @@ export function isYesterday(date: Date | string): boolean {
     );
 }
 
-/**
- * Group messages by date
- */
+// Agrupa mensagens por data
 export function groupMessagesByDate<T extends { createdAt: Date | string }>(
     messages: T[]
 ): Map<string, T[]> {

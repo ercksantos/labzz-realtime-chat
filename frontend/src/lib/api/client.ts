@@ -10,7 +10,7 @@ class ApiClient {
             headers: {
                 'Content-Type': 'application/json',
             },
-            withCredentials: true, // Para cookies CSRF
+            withCredentials: true,
         });
 
         // Request interceptor - adiciona token
@@ -25,13 +25,13 @@ class ApiClient {
             (error) => Promise.reject(error)
         );
 
-        // Response interceptor - trata erros e refresh token
+        // Interceptor de response - trata erros e refresh token
         this.client.interceptors.response.use(
             (response) => response,
             async (error: AxiosError) => {
                 const originalRequest = error.config as any;
 
-                // Se 401 e não é rota de refresh, tenta refresh token
+                // Se 401 e não é retry, tenta refresh token
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
 
@@ -47,8 +47,6 @@ class ApiClient {
 
                         return this.client(originalRequest);
                     } catch (refreshError) {
-                        // Refresh falhou, limpa tokens
-                        // Não redireciona automaticamente - deixa ProtectedRoute fazer isso
                         this.clearTokens();
                         return Promise.reject(refreshError);
                     }
@@ -59,7 +57,7 @@ class ApiClient {
         );
     }
 
-    // Token management
+    // Gerenciamento de tokens
     private getAccessToken(): string | null {
         if (typeof window === 'undefined') return null;
         return localStorage.getItem('accessToken');
@@ -94,7 +92,7 @@ class ApiClient {
         }
     }
 
-    // HTTP methods
+    // Métodos HTTP
     async get<T = any>(url: string, config?: any): Promise<AxiosResponse<T>> {
         return this.client.get<T>(url, config);
     }

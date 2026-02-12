@@ -44,11 +44,11 @@ function LoginForm() {
 
         try {
             await login(data);
-            // Success - navigate to return URL or chat
+            // Sucesso - navegar para URL de retorno ou chat
             router.push(returnUrl);
         } catch (err: any) {
             if (err.response?.data?.data?.requires2FA && err.response?.data?.data?.userId) {
-                // Redirect to 2FA with userId and returnUrl
+                // Redirecionar para 2FA com userId e returnUrl
                 router.push(`/2fa?userId=${err.response.data.data.userId}&returnUrl=${encodeURIComponent(returnUrl)}`);
                 return;
             }

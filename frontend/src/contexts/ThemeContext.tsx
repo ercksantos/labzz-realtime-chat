@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState<Theme>('light');
     const [mounted, setMounted] = useState(false);
 
-    // Load theme from localStorage on mount
+    // Carregar tema do localStorage
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') as Theme | null;
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setTheme(initialTheme);
         setMounted(true);
 
-        // Apply theme to document
+        // Aplicar tema ao documento
         if (initialTheme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
@@ -45,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Prevent flash of wrong theme
+    // Prevenir flash do tema incorreto
     if (!mounted) {
         return null;
     }

@@ -4,7 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 
 const nextConfig: NextConfig = {
-  // Image optimization
+  // Otimização de imagens
   images: {
     remotePatterns: [
       {
@@ -17,17 +17,17 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Performance optimizations
+  // Performance
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
 
-  // Experimental features for better performance
+  // Experimental
   experimental: {
     optimizePackageImports: ['framer-motion', 'socket.io-client'],
   },
 
-  // Headers for caching
+  // Headers de cache
   async headers() {
     return [
       {

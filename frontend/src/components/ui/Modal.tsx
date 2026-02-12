@@ -23,14 +23,14 @@ export const Modal: React.FC<ModalProps> = ({
     closeOnOverlayClick = true,
     showCloseButton = true,
 }) => {
-    // Focus trap for accessibility
+    // Focus trap para acessibilidade
     const modalRef = useFocusTrap<HTMLDivElement>({
         isActive: isOpen,
         onEscape: onClose,
         returnFocusOnDeactivate: true,
     });
 
-    // Prevent body scroll when modal is open
+    // Bloquear scroll do body quando modal aberto
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';

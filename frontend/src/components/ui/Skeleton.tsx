@@ -4,27 +4,12 @@ import { cn } from '@/lib/utils/cn';
 
 interface SkeletonProps {
     className?: string;
-    /**
-     * Shape variant
-     */
     variant?: 'text' | 'circular' | 'rectangular' | 'rounded';
-    /**
-     * Width of the skeleton (CSS value)
-     */
     width?: string | number;
-    /**
-     * Height of the skeleton (CSS value)
-     */
     height?: string | number;
-    /**
-     * Enable shimmer animation
-     */
     animate?: boolean;
 }
 
-/**
- * Skeleton loader component for loading states
- */
 export function Skeleton({
     className,
     variant = 'text',
@@ -59,20 +44,11 @@ export function Skeleton({
 }
 
 interface SkeletonTextProps {
-    /**
-     * Number of text lines
-     */
     lines?: number;
-    /**
-     * Gap between lines
-     */
     gap?: 'sm' | 'md' | 'lg';
     className?: string;
 }
 
-/**
- * Multiple line skeleton text
- */
 export function SkeletonText({ lines = 3, gap = 'md', className }: SkeletonTextProps) {
     const gapClasses = {
         sm: 'space-y-1',
@@ -86,7 +62,6 @@ export function SkeletonText({ lines = 3, gap = 'md', className }: SkeletonTextP
                 <Skeleton
                     key={index}
                     variant="text"
-                    // Last line is shorter
                     className={index === lines - 1 ? 'w-3/4' : 'w-full'}
                 />
             ))}
@@ -99,9 +74,8 @@ interface SkeletonAvatarProps {
     className?: string;
 }
 
-/**
- * Avatar skeleton loader
- */
+// Skeleton loader para avatar
+
 export function SkeletonAvatar({ size = 'md', className }: SkeletonAvatarProps) {
     const sizeClasses = {
         sm: 'w-8 h-8',
@@ -124,9 +98,6 @@ interface SkeletonButtonProps {
     className?: string;
 }
 
-/**
- * Button skeleton loader
- */
 export function SkeletonButton({ size = 'md', fullWidth, className }: SkeletonButtonProps) {
     const sizeClasses = {
         sm: 'h-8 w-20',
@@ -143,20 +114,11 @@ export function SkeletonButton({ size = 'md', fullWidth, className }: SkeletonBu
 }
 
 interface SkeletonCardProps {
-    /**
-     * Show avatar placeholder
-     */
     showAvatar?: boolean;
-    /**
-     * Number of text lines
-     */
     lines?: number;
     className?: string;
 }
 
-/**
- * Card skeleton loader
- */
 export function SkeletonCard({ showAvatar = true, lines = 3, className }: SkeletonCardProps) {
     return (
         <div
@@ -181,16 +143,10 @@ export function SkeletonCard({ showAvatar = true, lines = 3, className }: Skelet
 }
 
 interface SkeletonMessageProps {
-    /**
-     * Is this an outgoing message (right aligned)
-     */
     isOutgoing?: boolean;
     className?: string;
 }
 
-/**
- * Chat message skeleton loader
- */
 export function SkeletonMessage({ isOutgoing = false, className }: SkeletonMessageProps) {
     return (
         <div
@@ -220,9 +176,6 @@ interface SkeletonConversationProps {
     className?: string;
 }
 
-/**
- * Conversation list item skeleton loader
- */
 export function SkeletonConversation({ className }: SkeletonConversationProps) {
     return (
         <div
@@ -247,9 +200,6 @@ interface SkeletonChatListProps {
     className?: string;
 }
 
-/**
- * Chat list skeleton loader
- */
 export function SkeletonChatList({ count = 5, className }: SkeletonChatListProps) {
     return (
         <div className={cn('space-y-2', className)}>
@@ -265,9 +215,6 @@ interface SkeletonMessagesProps {
     className?: string;
 }
 
-/**
- * Messages area skeleton loader
- */
 export function SkeletonMessages({ count = 6, className }: SkeletonMessagesProps) {
     return (
         <div className={cn('space-y-4 p-4', className)}>

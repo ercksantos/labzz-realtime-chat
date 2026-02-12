@@ -27,14 +27,14 @@ export function MessageInput({
         onSendMessage(trimmedMessage);
         setMessage('');
 
-        // Reset textarea height
+        // Resetar altura do textarea
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
         }
     };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        // Send on Enter (without Shift)
+        // Enviar com Enter (sem Shift)
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -44,24 +44,24 @@ export function MessageInput({
     const handleChange = (value: string) => {
         setMessage(value);
 
-        // Auto-resize textarea
+        // Auto-resize do textarea
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
         }
 
-        // Emit typing event
+        // Emitir evento de digitação
         if (onTyping) {
             onTyping();
 
-            // Clear previous timeout
+            // Limpar timeout anterior
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
             }
 
-            // Set new timeout to stop typing indicator
+            // Timeout para parar indicador de digitação
             typingTimeoutRef.current = setTimeout(() => {
-                // Could emit "stop typing" event here if needed
+                // Emitir evento de parar digitação se necessário
             }, 1000);
         }
     };

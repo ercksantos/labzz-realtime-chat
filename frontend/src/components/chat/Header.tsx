@@ -20,7 +20,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     const profileMenuRef = useRef<HTMLDivElement>(null);
     const notificationsRef = useRef<HTMLDivElement>(null);
 
-    // Mock notifications
+    // Notificações mock
     const notifications = [
         { id: 1, message: 'João Silva enviou uma mensagem', time: '5 min atrás', unread: true },
         { id: 2, message: 'Maria Santos está online', time: '10 min atrás', unread: true },
@@ -29,7 +29,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
     const unreadCount = notifications.filter((n) => n.unread).length;
 
-    // Close menus when clicking outside
+    // Fechar menus ao clicar fora
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {

@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-// ============================================
-// Types
-// ============================================
-
 interface CacheEntry<T> {
     data: T;
     timestamp: number;
@@ -13,21 +9,13 @@ interface CacheEntry<T> {
 }
 
 interface UseCacheOptions<T> {
-    /** Time to live in milliseconds (default: 5 minutes) */
     ttl?: number;
-    /** Stale while revalidate - return cached data while fetching new (default: true) */
     staleWhileRevalidate?: boolean;
-    /** On success callback */
     onSuccess?: (data: T) => void;
-    /** On error callback */
     onError?: (error: Error) => void;
-    /** Initial data */
     initialData?: T;
-    /** Refetch on window focus (default: true) */
     refetchOnFocus?: boolean;
-    /** Refetch interval in ms (0 = disabled) */
     refetchInterval?: number;
-    /** Dependencies that trigger refetch */
     deps?: unknown[];
 }
 
@@ -41,10 +29,7 @@ interface UseCacheReturn<T> {
     refetch: () => Promise<void>;
 }
 
-// ============================================
-// In-Memory Cache Store
-// ============================================
-
+// Cache em memória
 const cacheStore = new Map<string, CacheEntry<unknown>>();
 
 function getCacheEntry<T>(key: string): CacheEntry<T> | undefined {
@@ -65,17 +50,13 @@ function setCacheEntry<T>(key: string, data: T, ttl: number): void {
     });
 }
 
-// ============================================
-// useCache Hook
-// ============================================
-
 export function useCache<T>(
     key: string | null,
     fetcher: () => Promise<T>,
     options: UseCacheOptions<T> = {}
 ): UseCacheReturn<T> {
     const {
-        ttl = 5 * 60 * 1000, // 5 minutes
+        ttl = 5 * 60 * 1000,
         staleWhileRevalidate = true,
         onSuccess,
         onError,
@@ -106,7 +87,6 @@ export function useCache<T>(
 
         const cached = getCacheEntry<T>(key);
 
-        // If we have cached data and staleWhileRevalidate is enabled, use it
         if (cached && staleWhileRevalidate) {
             setData(cached.data);
             setIsLoading(false);
@@ -130,13 +110,13 @@ export function useCache<T>(
         }
     }, [key, ttl, staleWhileRevalidate, onSuccess, onError]);
 
-    // Initial fetch
+    // Fetch inicial
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key, ...deps]);
 
-    // Refetch on window focus
+    // Refetch ao focar na janela
     useEffect(() => {
         if (!refetchOnFocus) return;
 
@@ -155,7 +135,7 @@ export function useCache<T>(
         };
     }, [fetchData, refetchOnFocus]);
 
-    // Refetch interval
+    // Refetch por intervalo
     useEffect(() => {
         if (!refetchInterval || refetchInterval <= 0) return;
 
@@ -163,7 +143,7 @@ export function useCache<T>(
         return () => clearInterval(intervalId);
     }, [fetchData, refetchInterval]);
 
-    // Mutate function
+    // Mutação direta do cache
     const mutate = useCallback(
         (newData?: T | ((current: T | undefined) => T)) => {
             if (!key) return;
@@ -195,9 +175,7 @@ export function useCache<T>(
     };
 }
 
-// ============================================
-// useCacheList Hook (for paginated data)
-// ============================================
+// Hook para dados paginados
 
 interface UseCacheListOptions<T> extends UseCacheOptions<T[]> {
     pageSize?: number;
@@ -255,17 +233,13 @@ export function useCacheList<T>(
     };
 }
 
-// ============================================
-// Cache Utilities
-// ============================================
+// Utilitários de cache
 
 export const cacheUtils = {
-    /** Clear a specific cache entry */
     invalidate: (key: string) => {
         cacheStore.delete(key);
     },
 
-    /** Clear all cache entries matching a prefix */
     invalidatePrefix: (prefix: string) => {
         for (const key of cacheStore.keys()) {
             if (key.startsWith(prefix)) {
@@ -274,15 +248,12 @@ export const cacheUtils = {
         }
     },
 
-    /** Clear all cache entries */
     clear: () => {
         cacheStore.clear();
     },
 
-    /** Get cache size */
     size: () => cacheStore.size,
 
-    /** Check if key exists and is not expired */
     has: (key: string) => {
         const entry = cacheStore.get(key);
         if (!entry) return false;

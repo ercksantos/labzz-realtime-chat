@@ -37,7 +37,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         '2xl': 'w-6 h-6',
     };
 
-    // Generate initials from name
+    // Gerar iniciais do nome
     const getInitials = (name: string): string => {
         return name
             .split(' ')
@@ -49,7 +49,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
     const initials = getInitials(alt);
 
-    // Generate consistent color based on name
+    // Gerar cor consistente baseada no nome
     const getColorFromName = (name: string): string => {
         const colors = [
             'from-blue-400 to-blue-600',

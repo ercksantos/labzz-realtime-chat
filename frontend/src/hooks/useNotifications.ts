@@ -9,28 +9,27 @@ export function useNotifications() {
     useEffect(() => {
         if (!isConnected || typeof window === 'undefined') return;
 
-        // Request notification permission
+        // Solicitar permissão
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
         const handleNewMessage = (data: any) => {
-            // Only show notification if the tab is not focused
+            // Notificação apenas se a aba não estiver em foco
             if (document.hidden && Notification.permission === 'granted') {
                 new Notification('Nova mensagem', {
                     body: `${data.senderName || 'Alguém'}: ${data.content || 'Enviou uma mensagem'}`,
                     icon: data.senderAvatar || '/logo.png',
-                    tag: data.conversationId, // Prevents duplicate notifications
+                    tag: data.conversationId,
                     requireInteraction: false,
                 });
             }
 
-            // Play notification sound
+            // Som de notificação
             playNotificationSound();
         };
 
         const handleTyping = (data: any) => {
-            // Could show a subtle indicator in the document title
             if (document.hidden) {
                 const originalTitle = document.title;
                 document.title = `💬 ${data.userName || 'Alguém'} está digitando...`;
@@ -41,7 +40,6 @@ export function useNotifications() {
             }
         };
 
-        // Register listeners
         on('message:new', handleNewMessage);
         on('typing:start', handleTyping);
 
@@ -52,7 +50,6 @@ export function useNotifications() {
     }, [isConnected, on, off]);
 
     const playNotificationSound = useCallback(() => {
-        // Create and play a simple notification sound
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();

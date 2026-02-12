@@ -25,7 +25,7 @@ function TwoFactorForm() {
     }, [userId, router]);
 
     const handleChange = (index: number, value: string) => {
-        // Only allow numbers
+        // Apenas números
         if (value && !/^\d$/.test(value)) return;
 
         const newCode = [...code];
@@ -33,35 +33,35 @@ function TwoFactorForm() {
         setCode(newCode);
         setError('');
 
-        // Auto-focus next input
+        // Focar próximo input
         if (value && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
 
-        // Auto-submit when all 6 digits are filled
+        // Submeter automaticamente com 6 dígitos
         if (newCode.every((digit) => digit !== '') && index === 5) {
             handleSubmit(newCode.join(''));
         }
     };
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-        // Handle backspace
+        // Tratar backspace
         if (e.key === 'Backspace') {
             e.preventDefault();
             const newCode = [...code];
 
             if (code[index]) {
-                // Clear current input
+                // Limpar input atual
                 newCode[index] = '';
                 setCode(newCode);
             } else if (index > 0) {
-                // Move to previous input and clear it
+                // Voltar ao input anterior e limpar
                 newCode[index - 1] = '';
                 setCode(newCode);
                 inputRefs.current[index - 1]?.focus();
             }
         }
-        // Handle left/right arrow keys
+        // Tratar setas esquerda/direita
         else if (e.key === 'ArrowLeft' && index > 0) {
             inputRefs.current[index - 1]?.focus();
         } else if (e.key === 'ArrowRight' && index < 5) {
@@ -73,7 +73,7 @@ function TwoFactorForm() {
         e.preventDefault();
         const pastedData = e.clipboardData.getData('text').trim();
 
-        // Only process if it's 6 digits
+        // Processar apenas se tiver 6 dígitos
         if (/^\d{6}$/.test(pastedData)) {
             const newCode = pastedData.split('');
             setCode(newCode);
@@ -82,7 +82,7 @@ function TwoFactorForm() {
             // Focus last input
             inputRefs.current[5]?.focus();
 
-            // Auto-submit
+            // Submeter automaticamente
             handleSubmit(pastedData);
         }
     };
@@ -105,7 +105,7 @@ function TwoFactorForm() {
 
         try {
             await verify2FA(userId, finalCode);
-            // Success - navigate to return URL or chat
+            // Sucesso - navegar para URL de retorno ou chat
             router.push(returnUrl);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Código inválido. Por favor, tente novamente.');
@@ -117,7 +117,7 @@ function TwoFactorForm() {
     };
 
     const handleResendCode = async () => {
-        // TODO: Implement resend code functionality when backend supports it
+        // TODO: Implementar reenvio quando o backend suportar
         setError('Funcionalidade de reenvio não implementada ainda');
     };
 

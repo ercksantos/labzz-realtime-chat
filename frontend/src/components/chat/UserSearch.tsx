@@ -51,7 +51,7 @@ export function UserSearch({ onClose }: UserSearchProps) {
         }
     }, []);
 
-    // Debounced search
+    // Busca com debounce
     useEffect(() => {
         if (searchDebounce) {
             clearTimeout(searchDebounce);
@@ -94,7 +94,7 @@ export function UserSearch({ onClose }: UserSearchProps) {
             const conversation = await chatService.createConversation(selectedUsers);
             console.log('UserSearch: Conversa criada', conversation);
 
-            // Navigate to the new conversation
+            // Navegar para a nova conversa
             router.push(`/chat?conversation=${conversation.id}`);
             onClose();
         } catch (err: any) {

@@ -4,18 +4,12 @@ import { cn } from '@/lib/utils/cn';
 import { useSkipToContent } from '@/hooks/useAccessibility';
 
 interface SkipLinkProps {
-    /** The ID of the main content element to skip to */
     mainContentId?: string;
-    /** Custom text for the skip link */
     text?: string;
-    /** Additional CSS classes */
     className?: string;
 }
 
-/**
- * Skip to main content link for keyboard navigation
- * Becomes visible only when focused via Tab key
- */
+// Link para pular ao conteúdo principal (visível apenas com Tab)
 export function SkipLink({
     mainContentId = 'main-content',
     text = 'Pular para o conteúdo principal',
@@ -31,9 +25,7 @@ export function SkipLink({
                 skipToMain();
             }}
             className={cn(
-                // Hidden by default
                 'sr-only focus:not-sr-only',
-                // Visible styles when focused
                 'focus:fixed focus:top-4 focus:left-4 focus:z-[9999]',
                 'focus:px-4 focus:py-2 focus:rounded-lg',
                 'focus:bg-primary-600 focus:text-white',
@@ -50,13 +42,10 @@ export function SkipLink({
 
 interface VisuallyHiddenProps {
     children: React.ReactNode;
-    /** If true, element is visible but styled as screen reader only */
     asChild?: boolean;
 }
 
-/**
- * Visually hidden content that is still accessible to screen readers
- */
+// Conteúdo visualmente oculto, acessível para leitores de tela
 export function VisuallyHidden({ children, asChild }: VisuallyHiddenProps) {
     return (
         <span
@@ -72,20 +61,13 @@ export function VisuallyHidden({ children, asChild }: VisuallyHiddenProps) {
 }
 
 interface LiveRegionProps {
-    /** Content to announce */
     children: React.ReactNode;
-    /** Urgency of the announcement */
     priority?: 'polite' | 'assertive' | 'off';
-    /** Whether to announce as an atomic unit */
     atomic?: boolean;
-    /** Which parts of the region to announce */
     relevant?: 'additions' | 'removals' | 'text' | 'all';
 }
 
-/**
- * Live region for screen reader announcements
- * Use for dynamic content updates that should be announced
- */
+// Região para anúncios dinâmicos a leitores de tela
 export function LiveRegion({
     children,
     priority = 'polite',
@@ -105,18 +87,12 @@ export function LiveRegion({
 }
 
 interface FocusRingProps {
-    /** Whether to show focus ring */
     visible?: boolean;
-    /** Ring color variant */
     variant?: 'primary' | 'error' | 'success' | 'warning';
-    /** Additional CSS classes */
     className?: string;
 }
 
-/**
- * Focus ring styles that can be applied to custom components
- * Provides consistent, accessible focus indicators
- */
+// Retorna classes CSS de indicador de foco (focus ring)
 export function getFocusRingClasses({
     visible = true,
     variant = 'primary',
@@ -137,12 +113,8 @@ export function getFocusRingClasses({
     );
 }
 
-/**
- * Higher contrast colors for better accessibility
- * Use these when default colors don't meet WCAG contrast requirements
- */
+// Cores acessíveis que atendem WCAG AA
 export const accessibleColors = {
-    // Text colors with guaranteed WCAG AA contrast
     text: {
         primary: 'text-gray-900 dark:text-gray-50',
         secondary: 'text-gray-700 dark:text-gray-200',
@@ -151,7 +123,6 @@ export const accessibleColors = {
         success: 'text-green-700 dark:text-green-300',
         warning: 'text-yellow-700 dark:text-yellow-300',
     },
-    // Background colors optimized for text contrast
     background: {
         error: 'bg-red-100 dark:bg-red-900/40',
         success: 'bg-green-100 dark:bg-green-900/40',
@@ -167,9 +138,7 @@ interface HeadingProps {
     id?: string;
 }
 
-/**
- * Semantic heading component that ensures proper heading hierarchy
- */
+// Heading semântico com hierarquia correta
 export function Heading({ level, children, className, id }: HeadingProps) {
     const sizeClasses = {
         1: 'text-3xl md:text-4xl font-bold',
@@ -202,9 +171,6 @@ export function Heading({ level, children, className, id }: HeadingProps) {
     }
 }
 
-/**
- * Utility to generate ARIA labels with context
- */
 export function getAriaLabel(action: string, context?: string): string {
     return context ? `${action}, ${context}` : action;
 }

@@ -4,7 +4,7 @@ import { motion, AnimatePresence, Variants, HTMLMotionProps } from 'framer-motio
 import { cn } from '@/lib/utils/cn';
 import { useReducedMotion } from '@/hooks/useAccessibility';
 
-// ============= Animation Variants =============
+// Variantes de animação
 
 export const fadeIn: Variants = {
     initial: { opacity: 0 },
@@ -68,7 +68,7 @@ export const staggerItem: Variants = {
     animate: { opacity: 1, y: 0 },
 };
 
-// ============= Animated Components =============
+// Componentes animados
 
 interface FadeInProps extends HTMLMotionProps<'div'> {
     children: React.ReactNode;
@@ -77,9 +77,6 @@ interface FadeInProps extends HTMLMotionProps<'div'> {
     direction?: 'up' | 'down' | 'left' | 'right' | 'none';
 }
 
-/**
- * Fade in animation wrapper
- */
 export function FadeIn({
     children,
     delay = 0,
@@ -123,9 +120,6 @@ interface ScaleInProps extends HTMLMotionProps<'div'> {
     duration?: number;
 }
 
-/**
- * Scale in animation wrapper
- */
 export function ScaleIn({
     children,
     delay = 0,
@@ -159,9 +153,6 @@ interface StaggerListProps extends HTMLMotionProps<'div'> {
     staggerDelay?: number;
 }
 
-/**
- * Stagger animation for lists
- */
 export function StaggerList({
     children,
     staggerDelay = 0.1,
@@ -198,9 +189,7 @@ interface StaggerItemProps extends HTMLMotionProps<'div'> {
     children: React.ReactNode;
 }
 
-/**
- * Individual stagger item (use inside StaggerList)
- */
+// Item individual para StaggerList
 export function StaggerItem({ children, className, ...props }: StaggerItemProps) {
     const prefersReducedMotion = useReducedMotion();
 
@@ -226,9 +215,6 @@ interface SlideInProps extends HTMLMotionProps<'div'> {
     duration?: number;
 }
 
-/**
- * Slide in animation wrapper
- */
 export function SlideIn({
     children,
     direction = 'bottom',
@@ -272,16 +258,13 @@ export function SlideIn({
     );
 }
 
-// ============= Page Transition =============
+// Transição de página
 
 interface PageTransitionProps {
     children: React.ReactNode;
     className?: string;
 }
 
-/**
- * Page transition wrapper
- */
 export function PageTransition({ children, className }: PageTransitionProps) {
     const prefersReducedMotion = useReducedMotion();
 
@@ -302,7 +285,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
     );
 }
 
-// ============= Pulse Animation =============
+// Animação de pulso
 
 interface PulseProps {
     children: React.ReactNode;
@@ -310,9 +293,6 @@ interface PulseProps {
     duration?: number;
 }
 
-/**
- * Subtle pulse animation for attention
- */
 export function Pulse({ children, className, duration = 2 }: PulseProps) {
     const prefersReducedMotion = useReducedMotion();
 
@@ -338,16 +318,13 @@ export function Pulse({ children, className, duration = 2 }: PulseProps) {
     );
 }
 
-// ============= Bounce Animation =============
+// Animação de bounce
 
 interface BounceProps {
     children: React.ReactNode;
     className?: string;
 }
 
-/**
- * Bounce animation for notifications or badges
- */
 export function Bounce({ children, className }: BounceProps) {
     const prefersReducedMotion = useReducedMotion();
 
@@ -371,5 +348,4 @@ export function Bounce({ children, className }: BounceProps) {
     );
 }
 
-// Re-export AnimatePresence for convenience
 export { AnimatePresence };

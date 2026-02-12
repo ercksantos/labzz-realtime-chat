@@ -16,27 +16,27 @@ function CallbackHandler() {
 
     useEffect(() => {
         const handleCallback = async () => {
-            // Get tokens from query params
+            // Obter tokens dos parâmetros da URL
             const accessToken = searchParams.get('accessToken');
             const refreshToken = searchParams.get('refreshToken');
             const error = searchParams.get('error');
 
             if (error) {
-                // OAuth failed - redirect to login with error message
+                // OAuth falhou - redirecionar para login com erro
                 router.push(`/login?error=${encodeURIComponent(error)}`);
                 return;
             }
 
             if (!accessToken || !refreshToken) {
-                // Missing tokens - redirect to login
+                // Tokens ausentes - redirecionar para login
                 router.push('/login?error=OAuth+failed');
                 return;
             }
 
-            // Save tokens
+            // Salvar tokens
             apiClient.setTokens(accessToken, refreshToken);
 
-            // Redirect to chat or returnUrl if provided
+            // Redirecionar para chat ou returnUrl
             const returnUrl = searchParams.get('returnUrl') || '/chat';
             router.push(returnUrl);
         };

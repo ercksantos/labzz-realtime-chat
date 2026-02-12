@@ -4,7 +4,7 @@ const CACHE_NAME = 'labzz-chat-v1';
 const STATIC_CACHE = 'labzz-static-v1';
 const DYNAMIC_CACHE = 'labzz-dynamic-v1';
 
-// Assets to cache immediately
+// Assets para cache imediato
 const STATIC_ASSETS = [
     '/',
     '/login',
@@ -14,19 +14,18 @@ const STATIC_ASSETS = [
     '/manifest.json',
 ];
 
-// Install event - cache static assets
+// Install - cachear assets estáticos
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(STATIC_CACHE).then((cache) => {
-            console.log('[SW] Caching static assets');
             return cache.addAll(STATIC_ASSETS);
         })
     );
-    // Activate immediately
+    // Ativar imediatamente
     self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate - limpar caches antigos
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -34,53 +33,52 @@ self.addEventListener('activate', (event) => {
                 cacheNames
                     .filter((name) => name !== STATIC_CACHE && name !== DYNAMIC_CACHE)
                     .map((name) => {
-                        console.log('[SW] Deleting old cache:', name);
                         return caches.delete(name);
                     })
             );
         })
     );
-    // Claim all clients
+    // Assumir controle de todos os clientes
     self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch - estratégias de cache
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Skip non-GET requests
+    // Ignorar requests não-GET
     if (request.method !== 'GET') {
         return;
     }
 
-    // Skip API requests - always go to network
+    // Ignorar API - sempre buscar na rede
     if (url.pathname.startsWith('/api')) {
         return;
     }
 
-    // Skip WebSocket connections
+    // Ignorar WebSocket
     if (url.protocol === 'ws:' || url.protocol === 'wss:') {
         return;
     }
 
-    // Network-first strategy for HTML pages
+    // Network-first para páginas HTML
     if (request.headers.get('accept')?.includes('text/html')) {
         event.respondWith(networkFirst(request));
         return;
     }
 
-    // Cache-first strategy for static assets
+    // Cache-first para assets estáticos
     if (isStaticAsset(url.pathname)) {
         event.respondWith(cacheFirst(request));
         return;
     }
 
-    // Stale-while-revalidate for other requests
+    // Stale-while-revalidate para demais requests
     event.respondWith(staleWhileRevalidate(request));
 });
 
-// Strategy: Network First (for HTML)
+// Estratégia: Network First (HTML)
 async function networkFirst(request) {
     try {
         const networkResponse = await fetch(request);
@@ -94,12 +92,12 @@ async function networkFirst(request) {
         if (cachedResponse) {
             return cachedResponse;
         }
-        // Return offline page
+        // Página offline como fallback
         return caches.match('/offline');
     }
 }
 
-// Strategy: Cache First (for static assets)
+// Estratégia: Cache First (assets estáticos)
 async function cacheFirst(request) {
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
@@ -113,7 +111,7 @@ async function cacheFirst(request) {
         }
         return networkResponse;
     } catch (error) {
-        // Return a placeholder for images
+        // Placeholder SVG para imagens
         if (request.destination === 'image') {
             return new Response(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#ddd" width="200" height="200"/></svg>',
@@ -124,7 +122,7 @@ async function cacheFirst(request) {
     }
 }
 
-// Strategy: Stale While Revalidate
+// Estratégia: Stale While Revalidate
 async function staleWhileRevalidate(request) {
     const cache = await caches.open(DYNAMIC_CACHE);
     const cachedResponse = await cache.match(request);
@@ -139,7 +137,7 @@ async function staleWhileRevalidate(request) {
     return cachedResponse || fetchPromise;
 }
 
-// Helper: Check if request is for static asset
+// Verifica se é asset estático
 function isStaticAsset(pathname) {
     const staticExtensions = [
         '.js',
@@ -158,7 +156,7 @@ function isStaticAsset(pathname) {
     return staticExtensions.some((ext) => pathname.endsWith(ext));
 }
 
-// Push notification handler
+// Push notifications
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 
@@ -180,7 +178,7 @@ self.addEventListener('push', (event) => {
     event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// Notification click handler
+// Click na notificação
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
@@ -190,19 +188,19 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window' }).then((clientList) => {
-            // Focus existing window if open
+            // Foca janela existente se aberta
             for (const client of clientList) {
                 if (client.url.includes(url) && 'focus' in client) {
                     return client.focus();
                 }
             }
-            // Open new window
+            // Abrir nova janela
             return self.clients.openWindow(url);
         })
     );
 });
 
-// Background sync for offline messages
+// Background sync para mensagens offline
 self.addEventListener('sync', (event) => {
     if (event.tag === 'sync-messages') {
         event.waitUntil(syncMessages());
@@ -210,7 +208,6 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncMessages() {
-    // Get pending messages from IndexedDB and send them
-    console.log('[SW] Syncing offline messages...');
-    // Implementation depends on IndexedDB setup
+    // Sincronizar mensagens pendentes do IndexedDB
+    console.log('[SW] Sincronizando mensagens offline...');
 }

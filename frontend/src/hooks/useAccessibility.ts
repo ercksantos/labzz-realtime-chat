@@ -3,28 +3,13 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 interface UseFocusTrapOptions {
-    /**
-     * Whether the focus trap is active
-     */
     isActive?: boolean;
-    /**
-     * Initial element to focus when trap is activated
-     */
     initialFocus?: 'first' | 'last' | React.RefObject<HTMLElement>;
-    /**
-     * Return focus to the previously focused element on deactivation
-     */
     returnFocusOnDeactivate?: boolean;
-    /**
-     * Called when user presses Escape
-     */
     onEscape?: () => void;
 }
 
-/**
- * Hook to trap focus within a container for accessibility
- * Useful for modals, dialogs, and dropdown menus
- */
+// Gerencia o foco dentro de um container (modais, dialogs, menus)
 export function useFocusTrap<T extends HTMLElement = HTMLElement>(
     options: UseFocusTrapOptions = {}
 ) {
@@ -38,7 +23,6 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
     const containerRef = useRef<T>(null);
     const previousActiveElement = useRef<Element | null>(null);
 
-    // Get all focusable elements within the container
     const getFocusableElements = useCallback(() => {
         if (!containerRef.current) return [];
 
@@ -55,12 +39,10 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
         return Array.from(
             containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
         ).filter((el) => {
-            // Filter out hidden elements
             return el.offsetParent !== null;
         });
     }, []);
 
-    // Focus the initial element
     const focusInitialElement = useCallback(() => {
         const focusableElements = getFocusableElements();
 
@@ -73,19 +55,18 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
         }
     }, [getFocusableElements, initialFocus]);
 
-    // Handle keyboard navigation
     const handleKeyDown = useCallback(
         (event: KeyboardEvent) => {
             if (!isActive || !containerRef.current) return;
 
-            // Handle Escape key
+            // Escape
             if (event.key === 'Escape' && onEscape) {
                 event.preventDefault();
                 onEscape();
                 return;
             }
 
-            // Handle Tab key for focus trapping
+            // Tab - ciclar foco entre elementos
             if (event.key === 'Tab') {
                 const focusableElements = getFocusableElements();
                 if (focusableElements.length === 0) return;
@@ -94,13 +75,11 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
                 const lastElement = focusableElements[focusableElements.length - 1];
 
                 if (event.shiftKey) {
-                    // Shift + Tab
                     if (document.activeElement === firstElement) {
                         event.preventDefault();
                         lastElement.focus();
                     }
                 } else {
-                    // Tab
                     if (document.activeElement === lastElement) {
                         event.preventDefault();
                         firstElement.focus();
@@ -114,19 +93,12 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
     useEffect(() => {
         if (!isActive) return;
 
-        // Store the previously focused element
         previousActiveElement.current = document.activeElement;
-
-        // Focus the initial element
         focusInitialElement();
-
-        // Add keyboard listener
         document.addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
-
-            // Return focus to the previous element
             if (returnFocusOnDeactivate && previousActiveElement.current) {
                 (previousActiveElement.current as HTMLElement).focus?.();
             }
@@ -136,9 +108,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(
     return containerRef;
 }
 
-/**
- * Hook to handle keyboard navigation in lists
- */
+// Navegação por setas em listas
 export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
     itemCount: number,
     options: {
@@ -156,7 +126,7 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
             let nextIndex = currentIndex.current;
             let handled = false;
 
-            // Vertical navigation
+            // Navegação vertical
             if (orientation === 'vertical' || orientation === 'both') {
                 if (key === 'ArrowDown') {
                     nextIndex = currentIndex.current + 1;
@@ -167,7 +137,7 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
                 }
             }
 
-            // Horizontal navigation
+            // Navegação horizontal
             if (orientation === 'horizontal' || orientation === 'both') {
                 if (key === 'ArrowRight') {
                     nextIndex = currentIndex.current + 1;
@@ -178,7 +148,7 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
                 }
             }
 
-            // Handle Home and End keys
+            // Home e End
             if (key === 'Home') {
                 nextIndex = 0;
                 handled = true;
@@ -187,7 +157,7 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
                 handled = true;
             }
 
-            // Handle Enter and Space for selection
+            // Enter e Space para seleção
             if (key === 'Enter' || key === ' ') {
                 event.preventDefault();
                 onSelect?.(currentIndex.current);
@@ -197,7 +167,6 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
             if (handled) {
                 event.preventDefault();
 
-                // Handle loop
                 if (loop) {
                     if (nextIndex < 0) nextIndex = itemCount - 1;
                     if (nextIndex >= itemCount) nextIndex = 0;
@@ -222,12 +191,9 @@ export function useArrowNavigation<T extends HTMLElement = HTMLElement>(
     };
 }
 
-/**
- * Hook to announce messages to screen readers
- */
+// Anuncia mensagens para leitores de tela
 export function useAnnounce() {
     const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-        // Create a live region if it doesn't exist
         let liveRegion = document.getElementById(`sr-live-${priority}`);
 
         if (!liveRegion) {
@@ -250,7 +216,7 @@ export function useAnnounce() {
             document.body.appendChild(liveRegion);
         }
 
-        // Clear and set message (forces re-announcement)
+        // Limpa e redefine para forçar re-anúncio
         liveRegion.textContent = '';
         setTimeout(() => {
             liveRegion!.textContent = message;
@@ -260,9 +226,7 @@ export function useAnnounce() {
     return announce;
 }
 
-/**
- * Hook to detect reduced motion preference
- */
+// Detecta preferência de movimento reduzido
 export function useReducedMotion(): boolean {
     const mediaQuery = typeof window !== 'undefined'
         ? window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -271,9 +235,7 @@ export function useReducedMotion(): boolean {
     return mediaQuery?.matches ?? false;
 }
 
-/**
- * Hook to skip to main content
- */
+// Pular para conteúdo principal
 export function useSkipToContent(mainContentId = 'main-content') {
     const skipToMain = useCallback(() => {
         const mainContent = document.getElementById(mainContentId);

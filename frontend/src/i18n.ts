@@ -2,7 +2,7 @@ import { getRequestConfig } from 'next-intl/server';
 import { cookies } from 'next/headers';
 
 export default getRequestConfig(async () => {
-    // Get locale from cookie or use default
+    // Obter locale do cookie ou usar padrão
     const cookieStore = await cookies();
     const locale = cookieStore.get('locale')?.value || 'pt-BR';
 

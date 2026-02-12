@@ -43,7 +43,7 @@ export function MessageSearch({ conversationId, onClose, onSelectMessage }: Mess
         }
     }, [conversationId]);
 
-    // Debounced search
+    // Busca com debounce
     useEffect(() => {
         if (searchDebounce) {
             clearTimeout(searchDebounce);

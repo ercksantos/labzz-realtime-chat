@@ -739,8 +739,7 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 - [TESTING.md](./docs/TESTING.md) - Guia de testes
 - [WEBSOCKET_EVENTS.md](./docs/WEBSOCKET_EVENTS.md) - Eventos Socket.IO
 
-### Roadmap e Arquitetura
-- [BACKEND_ROADMAP.md](../BACKEND_ROADMAP.md) - Roadmap completo do backend
+### Arquitetura
 - [ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Arquitetura do sistema
 
 ### API

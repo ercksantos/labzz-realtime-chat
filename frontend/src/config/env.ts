@@ -1,5 +1,4 @@
 export const env = {
-  // API Configuration
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api',
   wsUrl: process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000',
 
@@ -16,13 +15,11 @@ export const env = {
     },
   },
 
-  // App Configuration
   app: {
     name: process.env.NEXT_PUBLIC_APP_NAME || 'Labzz Chat',
     url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   },
 
-  // Feature Flags
   features: {
     oauth: true,
     twoFactor: true,
@@ -31,7 +28,7 @@ export const env = {
   },
 };
 
-// Validate required environment variables in production
+// Valida variáveis de ambiente obrigatórias em produção
 if (process.env.NODE_ENV === 'production') {
   const requiredEnvVars = ['NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_WS_URL'];
 
