@@ -36,7 +36,10 @@ export const authService = {
 
     async logout(): Promise<void> {
         try {
-            await apiClient.post('/auth/logout');
+            const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+            if (refreshToken) {
+                await apiClient.post('/auth/logout', { refreshToken });
+            }
         } finally {
             // Sempre limpa tokens, mesmo se API falhar
             apiClient.clearTokens();

@@ -120,16 +120,16 @@ export function ChatArea({
 
             const apiMessage: APIMessage = {
                 id: data.id || data.messageId,
-                conversationId: conversationId || '',
-                senderId: data.senderId || data.userId,
+                conversationId: data.conversationId || conversationId || '',
+                senderId: data.senderId || data.sender?.id || data.userId,
                 content: data.content || data.message,
                 createdAt: data.createdAt || new Date().toISOString(),
                 updatedAt: data.updatedAt || new Date().toISOString(),
                 sender: {
-                    id: data.senderId || data.userId,
-                    username: data.senderUsername || data.user?.username || 'user',
-                    name: data.senderName || data.user?.name || 'Usuário',
-                    avatar: data.senderAvatar || data.user?.avatar || null,
+                    id: data.senderId || data.sender?.id || data.userId,
+                    username: data.sender?.username || data.senderUsername || 'user',
+                    name: data.sender?.name || data.senderName || 'Usuário',
+                    avatar: data.sender?.avatar ?? data.senderAvatar ?? null,
                 },
             };
 

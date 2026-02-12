@@ -69,11 +69,21 @@ export function useMessages({ conversationId, initialPage = 1, limit = 50 }: Use
         }
     }, [conversationId, currentPage, hasMore, isLoadingMore, limit]);
 
-    // Adicionar nova mensagem
+    // Adicionar nova mensagem (ou substituir temporária do mesmo remetente)
     const addMessage = useCallback((message: Message) => {
         setMessages((prev) => {
+            // Se já existe com o mesmo ID, ignorar
             if (prev.some((msg) => msg.id === message.id)) {
                 return prev;
+            }
+            // Se é mensagem real vinda do servidor e existe uma temporária do mesmo remetente, substituir
+            if (!message.id.startsWith('temp-')) {
+                const tempIdx = prev.findIndex(
+                    (msg) => msg.id.startsWith('temp-') && msg.senderId === message.senderId
+                );
+                if (tempIdx !== -1) {
+                    return prev.map((msg, i) => (i === tempIdx ? message : msg));
+                }
             }
             return [...prev, message];
         });

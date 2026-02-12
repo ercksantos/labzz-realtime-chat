@@ -1,14 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChatLayout } from '@/components/chat/ChatLayout';
 import { ChatArea } from '@/components/chat/ChatArea';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketContext';
 import { chatService, type Conversation } from '@/services/chat.service';
 
 export default function ChatPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
+    const { user } = useAuth();
+    const { on, off, isConnected } = useSocket();
+    const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const loadConversations = useCallback(async () => {
         try {
@@ -26,6 +31,53 @@ export default function ChatPage() {
         loadConversations();
     }, [loadConversations]);
 
+    // Escutar new_message via socket para atualizar lista de conversas em tempo real
+    useEffect(() => {
+        if (!isConnected) return;
+
+        const handleNewMessage = (data: any) => {
+            const msgConversationId = data.conversationId;
+
+            setConversations((prev) => {
+                const exists = prev.some((c) => c.id === msgConversationId);
+                if (!exists) {
+                    // Conversa nova — recarregar lista do servidor (com debounce)
+                    if (reloadTimeoutRef.current) clearTimeout(reloadTimeoutRef.current);
+                    reloadTimeoutRef.current = setTimeout(() => {
+                        loadConversations();
+                    }, 500);
+                    return prev;
+                }
+                // Mover conversa com nova mensagem para o topo e atualizar lastMessage
+                return prev
+                    .map((c) =>
+                        c.id === msgConversationId
+                            ? {
+                                ...c,
+                                lastMessage: {
+                                    id: data.id || '',
+                                    content: data.content,
+                                    senderId: data.senderId || data.sender?.id || '',
+                                    createdAt: data.createdAt || new Date().toISOString(),
+                                },
+                            }
+                            : c
+                    )
+                    .sort((a, b) => {
+                        const aTime = a.lastMessage?.createdAt || a.updatedAt || '';
+                        const bTime = b.lastMessage?.createdAt || b.updatedAt || '';
+                        return new Date(bTime).getTime() - new Date(aTime).getTime();
+                    });
+            });
+        };
+
+        on('new_message', handleNewMessage);
+        return () => {
+            off('new_message', handleNewMessage);
+            if (reloadTimeoutRef.current) clearTimeout(reloadTimeoutRef.current);
+        };
+    }, [isConnected, on, off, loadConversations]);
+
     const handleSelectConversation = useCallback((conversation: Conversation) => {
         setSelectedConversation(conversation);
     }, []);
@@ -38,9 +90,9 @@ export default function ChatPage() {
     // Extrair nome e avatar do outro participante (conversa direta)
     const getConversationDisplay = (conv: Conversation) => {
         if (!conv) return { name: '', avatar: undefined, isOnline: false };
-        const otherParticipant = conv.participants?.find((p) => p.id !== selectedConversation?.participants?.[0]?.id);
+        const otherParticipant = conv.participants?.find((p) => p.id !== user?.id);
         return {
-            name: otherParticipant?.name || conv.participants?.[0]?.name || 'Conversa',
+            name: otherParticipant?.name || conv.name || 'Conversa',
             avatar: otherParticipant?.avatar || undefined,
             isOnline: otherParticipant?.isOnline || false,
         };

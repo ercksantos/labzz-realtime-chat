@@ -1,9 +1,11 @@
 import rateLimit from 'express-rate-limit';
 import { config } from '../config';
 
+const isDev = config.nodeEnv === 'development';
+
 export const generalLimiter = rateLimit({
     windowMs: config.security.rateLimitWindowMs,
-    max: config.security.rateLimitMax,
+    max: isDev ? 1000 : config.security.rateLimitMax,
     message: {
         status: 'error',
         message: 'Too many requests from this IP, please try again later.',
@@ -14,7 +16,7 @@ export const generalLimiter = rateLimit({
 
 export const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: isDev ? 100 : 5,
     message: {
         status: 'error',
         message: 'Too many authentication attempts, please try again later.',
