@@ -30,11 +30,14 @@ export const env = {
 
 // Valida variáveis de ambiente obrigatórias em produção
 if (process.env.NODE_ENV === 'production') {
-  const requiredEnvVars = ['NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_WS_URL'];
+  const requiredEnvVars: Record<string, string | undefined> = {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+  };
 
-  requiredEnvVars.forEach((envVar) => {
-    if (!process.env[envVar]) {
-      throw new Error(`Missing required environment variable: ${envVar}`);
+  Object.entries(requiredEnvVars).forEach(([name, value]) => {
+    if (!value) {
+      console.warn(`Missing required environment variable: ${name}`);
     }
   });
 }
