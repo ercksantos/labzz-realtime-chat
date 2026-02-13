@@ -4,7 +4,8 @@ import logger from '../utils/logger';
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
-const REDIS_TLS = process.env.REDIS_TLS === 'true' || (REDIS_HOST !== 'localhost' && REDIS_HOST !== '127.0.0.1');
+const REDIS_TLS =
+  process.env.REDIS_TLS === 'true' || (REDIS_HOST !== 'localhost' && REDIS_HOST !== '127.0.0.1');
 
 // Cliente Redis singleton
 const redisClient = new Redis({
