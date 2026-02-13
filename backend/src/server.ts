@@ -36,6 +36,9 @@ const io = initializeSocket(httpServer);
 // Disponibilizar io globalmente para uso nos controllers
 app.set('io', io);
 
+// Trust proxy - necessário para Render, Heroku, AWS, etc.
+app.set('trust proxy', 1);
+
 const PORT = config.port;
 
 app.use(express.json());
