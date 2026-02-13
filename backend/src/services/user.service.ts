@@ -7,167 +7,167 @@ import elasticsearchService from './elasticsearch.service';
 import logger from '../utils/logger';
 
 export class UserService {
-    async listUsers(page: number = 1, limit: number = 10, search?: string) {
-        const skip = (page - 1) * limit;
+  async listUsers(page: number = 1, limit: number = 10, search?: string) {
+    const skip = (page - 1) * limit;
 
-        const where = search
-            ? {
-                OR: [
-                    { username: { contains: search, mode: 'insensitive' as const } },
-                    { name: { contains: search, mode: 'insensitive' as const } },
-                    { email: { contains: search, mode: 'insensitive' as const } },
-                ],
-            }
-            : {};
+    const where = search
+      ? {
+          OR: [
+            { username: { contains: search, mode: 'insensitive' as const } },
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
 
-        const [users, total] = await Promise.all([
-            prisma.user.findMany({
-                where,
-                skip,
-                take: limit,
-                select: {
-                    id: true,
-                    email: true,
-                    username: true,
-                    name: true,
-                    avatar: true,
-                    isOnline: true,
-                    lastSeen: true,
-                    createdAt: true,
-                },
-                orderBy: { createdAt: 'desc' },
-            }),
-            prisma.user.count({ where }),
-        ]);
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          name: true,
+          avatar: true,
+          isOnline: true,
+          lastSeen: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.user.count({ where }),
+    ]);
 
-        return {
-            users,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
-        };
+    return {
+      users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getUserById(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        avatar: true,
+        isOnline: true,
+        lastSeen: true,
+        provider: true,
+        twoFactorEnabled: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError('User not found', 404);
     }
 
-    async getUserById(userId: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                name: true,
-                avatar: true,
-                isOnline: true,
-                lastSeen: true,
-                provider: true,
-                twoFactorEnabled: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
+    return user;
+  }
 
-        if (!user) {
-            throw new AppError('User not found', 404);
-        }
+  async updateUser(userId: string, data: UpdateUserInput) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-        return user;
+    if (!user) {
+      throw new AppError('User not found', 404);
     }
 
-    async updateUser(userId: string, data: UpdateUserInput) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-        });
+    if (data.username && data.username !== user.username) {
+      const existingUser = await prisma.user.findUnique({
+        where: { username: data.username },
+      });
 
-        if (!user) {
-            throw new AppError('User not found', 404);
-        }
-
-        if (data.username && data.username !== user.username) {
-            const existingUser = await prisma.user.findUnique({
-                where: { username: data.username },
-            });
-
-            if (existingUser) {
-                throw new AppError('Username already exists', 400);
-            }
-        }
-
-        const updatedUser = await prisma.user.update({
-            where: { id: userId },
-            data,
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                name: true,
-                avatar: true,
-                isOnline: true,
-                lastSeen: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        // Atualizar usuário no Elasticsearch
-        elasticsearchService
-            .indexUser({
-                id: updatedUser.id,
-                email: updatedUser.email,
-                username: updatedUser.username,
-                name: updatedUser.name,
-                avatar: updatedUser.avatar,
-                isOnline: updatedUser.isOnline,
-                createdAt: updatedUser.createdAt,
-            })
-            .catch((err: any) => {
-                logger.error('Erro ao atualizar usuário no ES:', err);
-            });
-
-        return updatedUser;
+      if (existingUser) {
+        throw new AppError('Username already exists', 400);
+      }
     }
 
-    async deleteUser(userId: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-        });
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        avatar: true,
+        isOnline: true,
+        lastSeen: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
-        if (!user) {
-            throw new AppError('User not found', 404);
-        }
+    // Atualizar usuário no Elasticsearch
+    elasticsearchService
+      .indexUser({
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+        isOnline: updatedUser.isOnline,
+        createdAt: updatedUser.createdAt,
+      })
+      .catch((err: any) => {
+        logger.error('Erro ao atualizar usuário no ES:', err);
+      });
 
-        await prisma.user.delete({
-            where: { id: userId },
-        });
+    return updatedUser;
+  }
 
-        return { message: 'User deleted successfully' };
+  async deleteUser(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new AppError('User not found', 404);
     }
 
-    async changePassword(userId: string, currentPassword: string, newPassword: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-        });
+    await prisma.user.delete({
+      where: { id: userId },
+    });
 
-        if (!user || !user.password) {
-            throw new AppError('User not found', 404);
-        }
+    return { message: 'User deleted successfully' };
+  }
 
-        const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
-        if (!isCurrentValid) {
-            throw new AppError('Current password is incorrect', 400);
-        }
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-        const hashedPassword = await bcrypt.hash(newPassword, config.security.bcryptRounds);
-        await prisma.user.update({
-            where: { id: userId },
-            data: { password: hashedPassword },
-        });
-
-        logger.info(`Password changed for user: ${userId}`);
-        return { message: 'Password changed successfully' };
+    if (!user || !user.password) {
+      throw new AppError('User not found', 404);
     }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentValid) {
+      throw new AppError('Current password is incorrect', 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, config.security.bcryptRounds);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    logger.info(`Password changed for user: ${userId}`);
+    return { message: 'Password changed successfully' };
+  }
 }
 
 export const userService = new UserService();

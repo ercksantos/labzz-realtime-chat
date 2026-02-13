@@ -6,9 +6,9 @@ const router = Router();
 
 // Middleware para resolver '/me' para o ID do usuário autenticado
 const resolveMe = (req: Request, _res: Response, next: NextFunction) => {
-    // @ts-expect-error - userId is set by auth middleware
-    req.params.id = req.userId;
-    next();
+  // @ts-expect-error - userId is set by auth middleware
+  req.params.id = req.userId;
+  next();
 };
 
 /**

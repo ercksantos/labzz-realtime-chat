@@ -4,38 +4,38 @@ import logger from '../utils/logger';
 
 // Configuração base do BullMQ
 const queueConfig: QueueOptions = {
-    connection: redisClient,
-    defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-            type: 'exponential',
-            delay: 2000,
-        },
-        removeOnComplete: {
-            age: 86400, // 24 horas
-            count: 100,
-        },
-        removeOnFail: {
-            age: 604800, // 7 dias
-            count: 1000,
-        },
+  connection: redisClient,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
     },
+    removeOnComplete: {
+      age: 86400, // 24 horas
+      count: 100,
+    },
+    removeOnFail: {
+      age: 604800, // 7 dias
+      count: 1000,
+    },
+  },
 };
 
 // Tipos de jobs para cada fila
 export interface EmailJob {
-    to: string;
-    subject: string;
-    template: string;
-    data: Record<string, any>;
+  to: string;
+  subject: string;
+  template: string;
+  data: Record<string, any>;
 }
 
 export interface NotificationJob {
-    userId: string;
-    type: 'message' | 'conversation' | 'system';
-    title: string;
-    body: string;
-    data?: Record<string, any>;
+  userId: string;
+  type: 'message' | 'conversation' | 'system';
+  title: string;
+  body: string;
+  data?: Record<string, any>;
 }
 
 // Filas
@@ -44,30 +44,30 @@ export const notificationQueue = new Queue<NotificationJob>('notification', queu
 
 // Eventos das filas
 emailQueue.on('error', (error) => {
-    logger.error('Erro na fila de emails:', error);
+  logger.error('Erro na fila de emails:', error);
 });
 
 notificationQueue.on('error', (error) => {
-    logger.error('Erro na fila de notificações:', error);
+  logger.error('Erro na fila de notificações:', error);
 });
 
 // Estatísticas das filas
 export const getQueueStats = async () => {
-    const [emailStats, notificationStats] = await Promise.all([
-        emailQueue.getJobCounts('waiting', 'active', 'completed', 'failed'),
-        notificationQueue.getJobCounts('waiting', 'active', 'completed', 'failed'),
-    ]);
+  const [emailStats, notificationStats] = await Promise.all([
+    emailQueue.getJobCounts('waiting', 'active', 'completed', 'failed'),
+    notificationQueue.getJobCounts('waiting', 'active', 'completed', 'failed'),
+  ]);
 
-    return {
-        email: emailStats,
-        notification: notificationStats,
-    };
+  return {
+    email: emailStats,
+    notification: notificationStats,
+  };
 };
 
 logger.info('✅ Filas BullMQ configuradas');
 
 export default {
-    emailQueue,
-    notificationQueue,
-    getQueueStats,
+  emailQueue,
+  notificationQueue,
+  getQueueStats,
 };

@@ -1,107 +1,108 @@
 // Formata data relativa (ex: "há 5 minutos", "ontem")
 export function formatRelativeTime(date: Date | string): string {
-    const now = new Date();
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
-    const diffInMs = now.getTime() - messageDate.getTime();
-    const diffInMinutes = Math.floor(diffInMs / 60000);
-    const diffInHours = Math.floor(diffInMs / 3600000);
-    const diffInDays = Math.floor(diffInMs / 86400000);
+  const now = new Date();
+  const messageDate = typeof date === 'string' ? new Date(date) : date;
+  const diffInMs = now.getTime() - messageDate.getTime();
+  const diffInMinutes = Math.floor(diffInMs / 60000);
+  const diffInHours = Math.floor(diffInMs / 3600000);
+  const diffInDays = Math.floor(diffInMs / 86400000);
 
-    if (diffInMinutes < 1) {
-        return 'agora';
-    }
+  if (diffInMinutes < 1) {
+    return 'agora';
+  }
 
-    if (diffInMinutes < 60) {
-        return `há ${diffInMinutes} ${diffInMinutes === 1 ? 'minuto' : 'minutos'}`;
-    }
+  if (diffInMinutes < 60) {
+    return `há ${diffInMinutes} ${diffInMinutes === 1 ? 'minuto' : 'minutos'}`;
+  }
 
-    if (diffInHours < 24) {
-        return `há ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
-    }
+  if (diffInHours < 24) {
+    return `há ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
+  }
 
-    if (diffInDays === 1) {
-        return 'ontem';
-    }
+  if (diffInDays === 1) {
+    return 'ontem';
+  }
 
-    if (diffInDays < 7) {
-        return `há ${diffInDays} dias`;
-    }
+  if (diffInDays < 7) {
+    return `há ${diffInDays} dias`;
+  }
 
-    // More than a week ago, show date
-    return messageDate.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
+  // More than a week ago, show date
+  return messageDate.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 }
 
 export function formatTime(date: Date | string): string {
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
-    return messageDate.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+  const messageDate = typeof date === 'string' ? new Date(date) : date;
+  return messageDate.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function formatFullTimestamp(date: Date | string): string {
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
-    return messageDate.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+  const messageDate = typeof date === 'string' ? new Date(date) : date;
+  return messageDate.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function isToday(date: Date | string): boolean {
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
-    const today = new Date();
-    return (
-        messageDate.getDate() === today.getDate() &&
-        messageDate.getMonth() === today.getMonth() &&
-        messageDate.getFullYear() === today.getFullYear()
-    );
+  const messageDate = typeof date === 'string' ? new Date(date) : date;
+  const today = new Date();
+  return (
+    messageDate.getDate() === today.getDate() &&
+    messageDate.getMonth() === today.getMonth() &&
+    messageDate.getFullYear() === today.getFullYear()
+  );
 }
 
 export function isYesterday(date: Date | string): boolean {
-    const messageDate = typeof date === 'string' ? new Date(date) : date;
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return (
-        messageDate.getDate() === yesterday.getDate() &&
-        messageDate.getMonth() === yesterday.getMonth() &&
-        messageDate.getFullYear() === yesterday.getFullYear()
-    );
+  const messageDate = typeof date === 'string' ? new Date(date) : date;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return (
+    messageDate.getDate() === yesterday.getDate() &&
+    messageDate.getMonth() === yesterday.getMonth() &&
+    messageDate.getFullYear() === yesterday.getFullYear()
+  );
 }
 
 // Agrupa mensagens por data
 export function groupMessagesByDate<T extends { createdAt: Date | string }>(
-    messages: T[]
+  messages: T[]
 ): Map<string, T[]> {
-    const groups = new Map<string, T[]>();
+  const groups = new Map<string, T[]>();
 
-    messages.forEach((message) => {
-        const date = typeof message.createdAt === 'string' ? new Date(message.createdAt) : message.createdAt;
+  messages.forEach((message) => {
+    const date =
+      typeof message.createdAt === 'string' ? new Date(message.createdAt) : message.createdAt;
 
-        let dateKey: string;
-        if (isToday(date)) {
-            dateKey = 'Hoje';
-        } else if (isYesterday(date)) {
-            dateKey = 'Ontem';
-        } else {
-            dateKey = date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-            });
-        }
+    let dateKey: string;
+    if (isToday(date)) {
+      dateKey = 'Hoje';
+    } else if (isYesterday(date)) {
+      dateKey = 'Ontem';
+    } else {
+      dateKey = date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    }
 
-        if (!groups.has(dateKey)) {
-            groups.set(dateKey, []);
-        }
-        groups.get(dateKey)!.push(message);
-    });
+    if (!groups.has(dateKey)) {
+      groups.set(dateKey, []);
+    }
+    groups.get(dateKey)!.push(message);
+  });
 
-    return groups;
+  return groups;
 }

@@ -11,14 +11,14 @@ router.use(authMiddleware);
 router.post('/conversations', chatController.createConversation.bind(chatController));
 router.get('/conversations', chatController.getUserConversations.bind(chatController));
 router.delete(
-    '/conversations/:conversationId',
-    chatController.deleteConversation.bind(chatController),
+  '/conversations/:conversationId',
+  chatController.deleteConversation.bind(chatController),
 );
 
 // Mensagens
 router.get(
-    '/conversations/:conversationId/messages',
-    chatController.getConversationMessages.bind(chatController),
+  '/conversations/:conversationId/messages',
+  chatController.getConversationMessages.bind(chatController),
 );
 
 export default router;

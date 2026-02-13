@@ -9,15 +9,12 @@ import logger from '../utils/logger';
 
 // Graceful shutdown
 const shutdown = async () => {
-    logger.info('Encerrando workers...');
+  logger.info('Encerrando workers...');
 
-    await Promise.all([
-        emailWorker.close(),
-        notificationWorker.close(),
-    ]);
+  await Promise.all([emailWorker.close(), notificationWorker.close()]);
 
-    logger.info('Workers encerrados');
-    process.exit(0);
+  logger.info('Workers encerrados');
+  process.exit(0);
 };
 
 process.on('SIGTERM', shutdown);

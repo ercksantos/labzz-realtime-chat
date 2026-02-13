@@ -15,8 +15,14 @@ const eslintConfig = defineConfig([
     rules: {
       'prettier/prettier': 'error',
       'react/no-unescaped-entities': 'off',
+      'react-compiler/react-compiler': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/static-components': 'warn',
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',

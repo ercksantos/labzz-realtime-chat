@@ -20,19 +20,19 @@ router.use('/cache', cacheRoutes);
 router.use('/queue', queueRoutes);
 
 router.get('/', (_req, res) => {
-    res.json({
-        message: 'Labzz Chat API',
-        version: '1.0.0',
-        endpoints: {
-            auth: '/api/auth',
-            users: '/api/users',
-            chat: '/api/chat',
-            search: '/api/search',
-            cache: '/api/cache',
-            queue: '/api/queue',
-            health: '/health',
-        },
-    });
+  res.json({
+    message: 'Labzz Chat API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      users: '/api/users',
+      chat: '/api/chat',
+      search: '/api/search',
+      cache: '/api/cache',
+      queue: '/api/queue',
+      health: '/health',
+    },
+  });
 });
 
 export default router;

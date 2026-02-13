@@ -4,143 +4,140 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { chatService, type Message } from '@/services/chat.service';
 
 interface UseMessagesOptions {
-    conversationId: string | undefined;
-    initialPage?: number;
-    limit?: number;
+  conversationId: string | undefined;
+  initialPage?: number;
+  limit?: number;
 }
 
 export function useMessages({ conversationId, initialPage = 1, limit = 50 }: UseMessagesOptions) {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(initialPage);
-    const [hasMore, setHasMore] = useState(true);
-    const [total, setTotal] = useState(0);
-    const isFetchingRef = useRef(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [hasMore, setHasMore] = useState(true);
+  const [total, setTotal] = useState(0);
+  const isFetchingRef = useRef(false);
 
-    // Carregar mensagens iniciais
-    const loadMessages = useCallback(async () => {
-        if (!conversationId || isLoading || isFetchingRef.current) return;
+  // Carregar mensagens iniciais
+  const loadMessages = useCallback(async () => {
+    if (!conversationId || isLoading || isFetchingRef.current) return;
 
-        isFetchingRef.current = true;
-        setIsLoading(true);
-        setError(null);
+    isFetchingRef.current = true;
+    setIsLoading(true);
+    setError(null);
 
-        try {
-            const data = await chatService.getMessages(conversationId, 1, limit);
-            setMessages(data.messages);
-            setTotal(data.pagination.total);
-            const more = data.pagination.hasMore ?? (data.pagination.page < (data.pagination.totalPages || 1));
-            setHasMore(more);
-            setCurrentPage(1);
-        } catch (err: any) {
-            console.error('useMessages: Erro ao carregar mensagens', err);
-            setError(err.response?.data?.message || 'Erro ao carregar mensagens');
-        } finally {
-            setIsLoading(false);
-            isFetchingRef.current = false;
-        }
-    }, [conversationId, limit, isLoading]);
+    try {
+      const data = await chatService.getMessages(conversationId, 1, limit);
+      setMessages(data.messages);
+      setTotal(data.pagination.total);
+      const more =
+        data.pagination.hasMore ?? data.pagination.page < (data.pagination.totalPages || 1);
+      setHasMore(more);
+      setCurrentPage(1);
+    } catch (err: any) {
+      console.error('useMessages: Erro ao carregar mensagens', err);
+      setError(err.response?.data?.message || 'Erro ao carregar mensagens');
+    } finally {
+      setIsLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, [conversationId, limit, isLoading]);
 
-    // Carregar mais mensagens (paginação)
-    const loadMore = useCallback(async () => {
-        if (!conversationId || !hasMore || isLoadingMore || isFetchingRef.current) return;
+  // Carregar mais mensagens (paginação)
+  const loadMore = useCallback(async () => {
+    if (!conversationId || !hasMore || isLoadingMore || isFetchingRef.current) return;
 
-        isFetchingRef.current = true;
-        setIsLoadingMore(true);
-        setError(null);
+    isFetchingRef.current = true;
+    setIsLoadingMore(true);
+    setError(null);
 
-        try {
-            const nextPage = currentPage + 1;
-            const data = await chatService.getMessages(conversationId, nextPage, limit);
+    try {
+      const nextPage = currentPage + 1;
+      const data = await chatService.getMessages(conversationId, nextPage, limit);
 
-            setMessages((prev) => [...data.messages, ...prev]);
-            setTotal(data.pagination.total);
-            const more = data.pagination.hasMore ?? (nextPage < (data.pagination.totalPages || 1));
-            setHasMore(more);
-            setCurrentPage(nextPage);
-        } catch (err: any) {
-            console.error('useMessages: Erro ao carregar mais mensagens', err);
-            setError(err.response?.data?.message || 'Erro ao carregar mais mensagens');
-        } finally {
-            setIsLoadingMore(false);
-            isFetchingRef.current = false;
-        }
-    }, [conversationId, currentPage, hasMore, isLoadingMore, limit]);
+      setMessages((prev) => [...data.messages, ...prev]);
+      setTotal(data.pagination.total);
+      const more = data.pagination.hasMore ?? nextPage < (data.pagination.totalPages || 1);
+      setHasMore(more);
+      setCurrentPage(nextPage);
+    } catch (err: any) {
+      console.error('useMessages: Erro ao carregar mais mensagens', err);
+      setError(err.response?.data?.message || 'Erro ao carregar mais mensagens');
+    } finally {
+      setIsLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [conversationId, currentPage, hasMore, isLoadingMore, limit]);
 
-    // Adicionar nova mensagem (ou substituir temporária do mesmo remetente)
-    const addMessage = useCallback((message: Message) => {
-        setMessages((prev) => {
-            // Se já existe com o mesmo ID, ignorar
-            if (prev.some((msg) => msg.id === message.id)) {
-                return prev;
-            }
-            // Se é mensagem real vinda do servidor e existe uma temporária do mesmo remetente, substituir
-            if (!message.id.startsWith('temp-')) {
-                const tempIdx = prev.findIndex(
-                    (msg) => msg.id.startsWith('temp-') && msg.senderId === message.senderId
-                );
-                if (tempIdx !== -1) {
-                    return prev.map((msg, i) => (i === tempIdx ? message : msg));
-                }
-            }
-            return [...prev, message];
-        });
-        setTotal((prev) => prev + 1);
-    }, []);
-
-    // Atualizar mensagem
-    const updateMessage = useCallback((messageId: string, updates: Partial<Message>) => {
-        setMessages((prev) =>
-            prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg))
+  // Adicionar nova mensagem (ou substituir temporária do mesmo remetente)
+  const addMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      // Se já existe com o mesmo ID, ignorar
+      if (prev.some((msg) => msg.id === message.id)) {
+        return prev;
+      }
+      // Se é mensagem real vinda do servidor e existe uma temporária do mesmo remetente, substituir
+      if (!message.id.startsWith('temp-')) {
+        const tempIdx = prev.findIndex(
+          (msg) => msg.id.startsWith('temp-') && msg.senderId === message.senderId
         );
-    }, []);
-
-    // Remover mensagem
-    const removeMessage = useCallback((messageId: string) => {
-        setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-        setTotal((prev) => Math.max(0, prev - 1));
-    }, []);
-
-    // Substituir mensagem temporária pela real
-    const replaceTemporaryMessage = useCallback((tempId: string, newMessage: Message) => {
-        setMessages((prev) =>
-            prev.map((msg) => (msg.id === tempId ? newMessage : msg))
-        );
-    }, []);
-
-    // Limpar mensagens
-    const clearMessages = useCallback(() => {
-        setMessages([]);
-        setTotal(0);
-        setCurrentPage(initialPage);
-        setHasMore(true);
-        setError(null);
-    }, [initialPage]);
-
-    // Recarregar ao trocar conversa
-    useEffect(() => {
-        if (conversationId) {
-            clearMessages();
-            loadMessages();
+        if (tempIdx !== -1) {
+          return prev.map((msg, i) => (i === tempIdx ? message : msg));
         }
-    }, [conversationId]); // Only run when conversationId changes
+      }
+      return [...prev, message];
+    });
+    setTotal((prev) => prev + 1);
+  }, []);
 
-    return {
-        messages,
-        isLoading,
-        isLoadingMore,
-        error,
-        hasMore,
-        total,
-        currentPage,
-        loadMessages,
-        loadMore,
-        addMessage,
-        updateMessage,
-        removeMessage,
-        replaceTemporaryMessage,
-        clearMessages,
-    };
+  // Atualizar mensagem
+  const updateMessage = useCallback((messageId: string, updates: Partial<Message>) => {
+    setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, ...updates } : msg)));
+  }, []);
+
+  // Remover mensagem
+  const removeMessage = useCallback((messageId: string) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+    setTotal((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  // Substituir mensagem temporária pela real
+  const replaceTemporaryMessage = useCallback((tempId: string, newMessage: Message) => {
+    setMessages((prev) => prev.map((msg) => (msg.id === tempId ? newMessage : msg)));
+  }, []);
+
+  // Limpar mensagens
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setTotal(0);
+    setCurrentPage(initialPage);
+    setHasMore(true);
+    setError(null);
+  }, [initialPage]);
+
+  // Recarregar ao trocar conversa
+  useEffect(() => {
+    if (conversationId) {
+      clearMessages();
+      loadMessages();
+    }
+  }, [conversationId]); // Only run when conversationId changes
+
+  return {
+    messages,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasMore,
+    total,
+    currentPage,
+    loadMessages,
+    loadMore,
+    addMessage,
+    updateMessage,
+    removeMessage,
+    replaceTemporaryMessage,
+    clearMessages,
+  };
 }

@@ -1,134 +1,131 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service';
 import {
-    registerSchema,
-    loginSchema,
-    refreshTokenSchema,
-    verify2FASchema,
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+  verify2FASchema,
 } from '../validators/auth.validator';
 import { ZodError } from 'zod';
 import { AppError } from '../middlewares/errorHandler';
 import logger from '../utils/logger';
 
 export class AuthController {
-    async register(req: Request, res: Response, next: NextFunction) {
-        try {
-            const validatedData = registerSchema.parse(req.body);
-            const result = await authService.register(validatedData);
+  async register(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = registerSchema.parse(req.body);
+      const result = await authService.register(validatedData);
 
-            logger.info(`New user registered: ${result.user.email}`);
+      logger.info(`New user registered: ${result.user.email}`);
 
-            res.status(201).json({
-                status: 'success',
-                data: result,
-            });
-        } catch (error) {
-            if (error instanceof ZodError) {
-                return next(new AppError(error.errors[0].message, 400));
-            }
-            next(error);
-        }
+      res.status(201).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.errors[0].message, 400));
+      }
+      next(error);
     }
+  }
 
-    async login(req: Request, res: Response, next: NextFunction) {
-        try {
-            const validatedData = loginSchema.parse(req.body);
-            const result = await authService.login(validatedData);
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      const result = await authService.login(validatedData);
 
-            if ('requires2FA' in result && result.requires2FA) {
-                return res.status(200).json({
-                    status: 'success',
-                    data: result,
-                });
-            }
+      if ('requires2FA' in result && result.requires2FA) {
+        return res.status(200).json({
+          status: 'success',
+          data: result,
+        });
+      }
 
-            // @ts-expect-error - user exists when not requiring 2FA
-            logger.info(`User logged in: ${result.user.email}`);
+      // @ts-expect-error - user exists when not requiring 2FA
+      logger.info(`User logged in: ${result.user.email}`);
 
-            res.status(200).json({
-                status: 'success',
-                data: result,
-            });
-        } catch (error) {
-            if (error instanceof ZodError) {
-                return next(new AppError(error.errors[0].message, 400));
-            }
-            next(error);
-        }
+      res.status(200).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.errors[0].message, 400));
+      }
+      next(error);
     }
+  }
 
-    async verify2FA(req: Request, res: Response, next: NextFunction) {
-        try {
-            const validatedData = verify2FASchema.parse(req.body);
-            const result = await authService.verify2FAAndLogin(
-                validatedData.userId,
-                validatedData.token
-            );
+  async verify2FA(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = verify2FASchema.parse(req.body);
+      const result = await authService.verify2FAAndLogin(validatedData.userId, validatedData.token);
 
-            logger.info(`User logged in with 2FA: ${result.user.email}`);
+      logger.info(`User logged in with 2FA: ${result.user.email}`);
 
-            res.status(200).json({
-                status: 'success',
-                data: result,
-            });
-        } catch (error) {
-            if (error instanceof ZodError) {
-                return next(new AppError(error.errors[0].message, 400));
-            }
-            next(error);
-        }
+      res.status(200).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.errors[0].message, 400));
+      }
+      next(error);
     }
+  }
 
-    async refreshToken(req: Request, res: Response, next: NextFunction) {
-        try {
-            const validatedData = refreshTokenSchema.parse(req.body);
-            const result = await authService.refreshAccessToken(validatedData.refreshToken);
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = refreshTokenSchema.parse(req.body);
+      const result = await authService.refreshAccessToken(validatedData.refreshToken);
 
-            res.status(200).json({
-                status: 'success',
-                data: result,
-            });
-        } catch (error) {
-            if (error instanceof ZodError) {
-                return next(new AppError(error.errors[0].message, 400));
-            }
-            next(error);
-        }
+      res.status(200).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.errors[0].message, 400));
+      }
+      next(error);
     }
+  }
 
-    async logout(req: Request, res: Response, next: NextFunction) {
-        try {
-            const validatedData = refreshTokenSchema.parse(req.body);
-            const result = await authService.logout(validatedData.refreshToken);
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = refreshTokenSchema.parse(req.body);
+      const result = await authService.logout(validatedData.refreshToken);
 
-            logger.info('User logged out');
+      logger.info('User logged out');
 
-            res.status(200).json({
-                status: 'success',
-                data: result,
-            });
-        } catch (error) {
-            if (error instanceof ZodError) {
-                return next(new AppError(error.errors[0].message, 400));
-            }
-            next(error);
-        }
+      res.status(200).json({
+        status: 'success',
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.errors[0].message, 400));
+      }
+      next(error);
     }
+  }
 
-    async getMe(req: Request, res: Response, next: NextFunction) {
-        try {
-            // @ts-expect-error - userId is set by auth middleware
-            const userId = req.userId;
-            const user = await authService.getUserById(userId);
+  async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      // @ts-expect-error - userId is set by auth middleware
+      const userId = req.userId;
+      const user = await authService.getUserById(userId);
 
-            res.status(200).json({
-                status: 'success',
-                data: { user },
-            });
-        } catch (error) {
-            next(error);
-        }
+      res.status(200).json({
+        status: 'success',
+        data: { user },
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 }
 
 export const authController = new AuthController();

@@ -4,7 +4,11 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/generate', authMiddleware, twoFactorController.generateSecret.bind(twoFactorController));
+router.get(
+  '/generate',
+  authMiddleware,
+  twoFactorController.generateSecret.bind(twoFactorController),
+);
 router.post('/enable', authMiddleware, twoFactorController.enable2FA.bind(twoFactorController));
 router.post('/disable', authMiddleware, twoFactorController.disable2FA.bind(twoFactorController));
 
