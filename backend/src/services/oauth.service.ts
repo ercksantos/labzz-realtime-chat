@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import { config } from '../config';
 import { AppError } from '../middlewares/errorHandler';
 import { jwtService } from '../utils/jwt';
+import logger from '../utils/logger';
 
 interface GoogleUserInfo {
   id: string;
@@ -45,30 +46,44 @@ export class OAuthService {
   }
 
   async authenticateWithGoogle(code: string) {
-    const { data } = await axios.post('https://oauth2.googleapis.com/token', {
-      code,
-      client_id: config.oauth.google.clientId,
-      client_secret: config.oauth.google.clientSecret,
-      redirect_uri: config.oauth.google.callbackUrl,
-      grant_type: 'authorization_code',
-    });
+    const redirectUri = config.oauth.google.callbackUrl;
+    logger.info(`Google OAuth: exchanging code, redirect_uri=${redirectUri}`);
 
-    const { access_token } = data;
+    try {
+      const { data } = await axios.post('https://oauth2.googleapis.com/token', {
+        code,
+        client_id: config.oauth.google.clientId,
+        client_secret: config.oauth.google.clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      });
 
-    const { data: userInfo } = await axios.get<GoogleUserInfo>(
-      'https://www.googleapis.com/oauth2/v2/userinfo',
-      {
-        headers: { Authorization: `Bearer ${access_token}` },
-      },
-    );
+      const { access_token } = data;
 
-    return this.handleOAuthUser(
-      'google',
-      userInfo.id,
-      userInfo.email,
-      userInfo.name,
-      userInfo.picture,
-    );
+      const { data: userInfo } = await axios.get<GoogleUserInfo>(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        },
+      );
+
+      return this.handleOAuthUser(
+        'google',
+        userInfo.id,
+        userInfo.email,
+        userInfo.name,
+        userInfo.picture,
+      );
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('Google OAuth token exchange failed:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          redirect_uri: redirectUri,
+        });
+      }
+      throw error;
+    }
   }
 
   async getGitHubAuthUrl(): Promise<string> {
@@ -84,20 +99,44 @@ export class OAuthService {
   }
 
   async authenticateWithGitHub(code: string) {
-    const { data } = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      {
-        client_id: config.oauth.github.clientId,
-        client_secret: config.oauth.github.clientSecret,
-        code,
-        redirect_uri: config.oauth.github.callbackUrl,
-      },
-      {
-        headers: { Accept: 'application/json' },
-      },
-    );
+    const redirectUri = config.oauth.github.callbackUrl;
+    logger.info(`GitHub OAuth: exchanging code, redirect_uri=${redirectUri}`);
 
-    const { access_token } = data;
+    let access_token: string;
+    try {
+      const { data } = await axios.post(
+        'https://github.com/login/oauth/access_token',
+        {
+          client_id: config.oauth.github.clientId,
+          client_secret: config.oauth.github.clientSecret,
+          code,
+          redirect_uri: redirectUri,
+        },
+        {
+          headers: { Accept: 'application/json' },
+        },
+      );
+
+      if (data.error) {
+        logger.error('GitHub OAuth token exchange failed:', {
+          error: data.error,
+          error_description: data.error_description,
+          redirect_uri: redirectUri,
+        });
+        throw new AppError(`GitHub OAuth error: ${data.error_description || data.error}`, 400);
+      }
+
+      access_token = data.access_token;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        logger.error('GitHub OAuth token exchange failed:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          redirect_uri: redirectUri,
+        });
+      }
+      throw error;
+    }
 
     const { data: userInfo } = await axios.get<GitHubUserInfo>('https://api.github.com/user', {
       headers: {
