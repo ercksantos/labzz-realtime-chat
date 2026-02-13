@@ -1,6 +1,5 @@
 import helmet from 'helmet';
 import cors from 'cors';
-// @ts-expect-error - no types available
 import mongoSanitize from 'express-mongo-sanitize';
 // @ts-expect-error - no types available
 import xss from 'xss-clean';

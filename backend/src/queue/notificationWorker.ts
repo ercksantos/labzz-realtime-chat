@@ -19,7 +19,7 @@ export const notificationWorker = new Worker<NotificationJob>(
     }
   },
   {
-    connection: redisClient,
+    connection: redisClient as any,
     concurrency: 10, // Processar até 10 notificações simultaneamente
   },
 );

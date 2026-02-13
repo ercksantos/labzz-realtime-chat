@@ -19,7 +19,7 @@ export const emailWorker = new Worker<EmailJob>(
     }
   },
   {
-    connection: redisClient,
+    connection: redisClient as any,
     concurrency: 5, // Processar até 5 emails simultaneamente
     limiter: {
       max: 10, // Máximo de 10 emails

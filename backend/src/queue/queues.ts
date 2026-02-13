@@ -4,7 +4,7 @@ import logger from '../utils/logger';
 
 // Configuração base do BullMQ
 const queueConfig: QueueOptions = {
-  connection: redisClient,
+  connection: redisClient as any,
   defaultJobOptions: {
     attempts: 3,
     backoff: {

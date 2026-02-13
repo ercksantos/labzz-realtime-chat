@@ -7,20 +7,20 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* yarn.lock* ./
+COPY package.json ./
 COPY prisma ./prisma/
 
-RUN npm ci --omit=dev && \
+RUN npm install --omit=dev && \
     npx prisma generate
 
 # Stage 2: Build
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package.json package-lock.json* yarn.lock* ./
+COPY package.json ./
 COPY prisma ./prisma/
 
-RUN npm ci && \
+RUN npm install && \
     npx prisma generate
 
 COPY tsconfig.json ./
