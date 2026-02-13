@@ -124,7 +124,7 @@ export default function Home() {
               Ver no GitHub
             </a>
             <a
-              href="/auth/login"
+              href="/login"
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary-600 text-white font-semibold text-base hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
               Acessar o Chat
