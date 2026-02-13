@@ -63,16 +63,17 @@ export const initializeWorkers = async (): Promise<boolean> => {
   emailWorker.on('error', (error) => logger.error('Erro no email worker:', error.message));
 
   notificationWorker.on('completed', (job) => logger.info(`Notification job ${job.id} completado`));
-  notificationWorker.on('failed', (job, error) => logger.error(`Notification job ${job?.id} falhou:`, error));
-  notificationWorker.on('error', (error) => logger.error('Erro no notification worker:', error.message));
+  notificationWorker.on('failed', (job, error) =>
+    logger.error(`Notification job ${job?.id} falhou:`, error),
+  );
+  notificationWorker.on('error', (error) =>
+    logger.error('Erro no notification worker:', error.message),
+  );
 
   // Graceful shutdown
   const shutdown = async () => {
     logger.info('Encerrando workers...');
-    await Promise.all([
-      emailWorker?.close(),
-      notificationWorker?.close(),
-    ]);
+    await Promise.all([emailWorker?.close(), notificationWorker?.close()]);
     logger.info('Workers encerrados');
   };
 
