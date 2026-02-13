@@ -11,7 +11,8 @@ import {
 } from './config/elasticsearch';
 import { checkRedisConnection } from './config/redis';
 import cacheService from './services/cache.service';
-import './queue/workers'; // Inicializar workers BullMQ
+import { initializeQueues } from './queue/queues';
+import { initializeWorkers } from './queue/workers';
 import {
   helmetMiddleware,
   corsMiddleware,
@@ -95,8 +96,11 @@ app.use(errorHandler);
 const initializeServices = async () => {
   // Verificar e inicializar Redis
   const redisConnected = await checkRedisConnection();
-  if (!redisConnected) {
-    logger.warn('⚠️  Servidor iniciará sem Redis (cache desabilitado)');
+  if (redisConnected) {
+    await initializeQueues();
+    await initializeWorkers();
+  } else {
+    logger.warn('⚠️  Servidor iniciará sem Redis (cache e filas desabilitados)');
   }
 
   // Verificar e inicializar Elasticsearch

@@ -1,4 +1,4 @@
-import { notificationQueue, NotificationJob } from '../queue/queues';
+import { getNotificationQueue, NotificationJob } from '../queue/queues';
 import logger from '../utils/logger';
 
 export class NotificationService {
@@ -20,7 +20,14 @@ export class NotificationService {
     options?: { delay?: number; priority?: number },
   ): Promise<void> {
     try {
-      await notificationQueue.add('send-notification', job, {
+      const queue = getNotificationQueue();
+      if (!queue) {
+        logger.warn('Fila de notificações indisponível, criando diretamente...');
+        await this.createNotification(job);
+        return;
+      }
+
+      await queue.add('send-notification', job, {
         delay: options?.delay,
         priority: options?.priority,
       });

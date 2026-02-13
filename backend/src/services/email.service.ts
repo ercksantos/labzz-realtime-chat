@@ -1,5 +1,5 @@
 import nodemailer, { Transporter } from 'nodemailer';
-import { emailQueue, EmailJob } from '../queue/queues';
+import { getEmailQueue, EmailJob } from '../queue/queues';
 import logger from '../utils/logger';
 
 export class EmailService {
@@ -77,7 +77,14 @@ export class EmailService {
   // Adicionar job à fila de emails
   async queueEmail(job: EmailJob, options?: { delay?: number; priority?: number }): Promise<void> {
     try {
-      await emailQueue.add('send-email', job, {
+      const queue = getEmailQueue();
+      if (!queue) {
+        logger.warn('Fila de email indisponível, enviando diretamente...');
+        await this.sendEmail(job);
+        return;
+      }
+
+      await queue.add('send-email', job, {
         delay: options?.delay,
         priority: options?.priority,
       });
