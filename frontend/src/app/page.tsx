@@ -15,17 +15,20 @@ const features = [
   {
     icon: '💬',
     title: 'Chat em Tempo Real',
-    description: 'Mensagens instantâneas com WebSocket (Socket.io), indicadores de digitação e status online.',
+    description:
+      'Mensagens instantâneas com WebSocket (Socket.io), indicadores de digitação e status online.',
   },
   {
     icon: '🔐',
     title: 'Autenticação Completa',
-    description: 'JWT com refresh token, OAuth2 (Google & GitHub) e autenticação de dois fatores (2FA/TOTP).',
+    description:
+      'JWT com refresh token, OAuth2 (Google & GitHub) e autenticação de dois fatores (2FA/TOTP).',
   },
   {
     icon: '⚡',
     title: 'Alta Performance',
-    description: 'Cache com Redis, filas assíncronas com BullMQ e busca avançada com Elasticsearch.',
+    description:
+      'Cache com Redis, filas assíncronas com BullMQ e busca avançada com Elasticsearch.',
   },
   {
     icon: '🌍',
@@ -35,12 +38,14 @@ const features = [
   {
     icon: '🎨',
     title: 'UI Moderna',
-    description: 'Design responsivo com Tailwind CSS, modo escuro, animações com Framer Motion e PWA.',
+    description:
+      'Design responsivo com Tailwind CSS, modo escuro, animações com Framer Motion e PWA.',
   },
   {
     icon: '🧪',
     title: 'Testes & Qualidade',
-    description: 'Testes unitários e de integração com Jest, E2E com Playwright e CI/CD configurado.',
+    description:
+      'Testes unitários e de integração com Jest, E2E com Playwright e CI/CD configurado.',
   },
 ];
 
@@ -97,8 +102,8 @@ export default function Home() {
             transition={{ delay: 0.35, duration: 0.6 }}
             className="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed"
           >
-            Plataforma de comunicação em tempo real construída com tecnologias modernas.
-            Chat instantâneo, autenticação robusta, design responsivo e muito mais.
+            Plataforma de comunicação em tempo real construída com tecnologias modernas. Chat
+            instantâneo, autenticação robusta, design responsivo e muito mais.
           </motion.p>
 
           <motion.div
@@ -124,7 +129,12 @@ export default function Home() {
             >
               Acessar o Chat
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </a>
           </motion.div>
@@ -147,7 +157,8 @@ export default function Home() {
           viewport={{ once: true }}
           className="text-center text-gray-500 dark:text-gray-400 mb-14 max-w-xl mx-auto"
         >
-          Sistema completo construído do zero com foco em segurança, performance e experiência do usuário.
+          Sistema completo construído do zero com foco em segurança, performance e experiência do
+          usuário.
         </motion.p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -240,10 +251,9 @@ export default function Home() {
                 Licença de Uso Restrito
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
-                Este software foi desenvolvido por{' '}
-                <strong>Erick Pereira dos Santos</strong> exclusivamente para fins de avaliação
-                técnica no processo seletivo da Labzz. O autor mantém todos os direitos sobre o
-                código-fonte.
+                Este software foi desenvolvido por <strong>Erick Pereira dos Santos</strong>{' '}
+                exclusivamente para fins de avaliação técnica no processo seletivo da Labzz. O autor
+                mantém todos os direitos sobre o código-fonte.
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                 É proibido o uso comercial, modificação, distribuição ou incorporação deste código
